@@ -32,7 +32,7 @@ benchmark_runner = AgroNerveBenchmark()
 
 # Pydantic Request & Response Schemas
 class QueryRequest(BaseModel):
-    query: str = Field(..., example="What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?")
+    query: str = Field(..., json_schema_extra={"example": "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"})
 
 class QueryResponse(BaseModel):
     query: str
