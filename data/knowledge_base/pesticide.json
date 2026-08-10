@@ -1,0 +1,72 @@
+[
+  {
+    "id": "PEST_001",
+    "trade_or_common_name": "Chlorantraniliprole 18.5% SC (Coragen / Shenzi)",
+    "category": "Insecticide (Anthranilic Diamide)",
+    "target_pests": "Stem Borer (Scirpophaga incertulas), Leaf Folder (Cnaphalocrocis medinalis) in Paddy; Diamondback Moth (Plutella xylostella) in Cabbage/Cauliflower; Fruit Borer (Helicoverpa armigera) in Tomato and Cotton.",
+    "recommended_dosage": "0.3 to 0.4 ml per Liter of water (60 ml/acre diluted in 150-200 L water).",
+    "pre_harvest_interval_days": 14,
+    "safety_precautions": "Wear nitrile gloves, eye goggles, and a face mask during preparation and application. Do not spray during peak bee foraging hours. Keep livestock away from treated area for 48 hours.",
+    "cibrc_status": "Approved for registered label crops; strictly adhere to dosage rates."
+  },
+  {
+    "id": "PEST_002",
+    "trade_or_common_name": "Imidacloprid 17.8% SL (Confidor / Victor)",
+    "category": "Systemic Insecticide (Neonicotinoid)",
+    "target_pests": "Sucking pests: Aphids, Jassids, Thrips, and Whiteflies in Cotton, Chilli, Tomato, Okra, and Paddy (Brown Plant Hopper).",
+    "recommended_dosage": "0.3 to 0.5 ml per Liter of water (50-75 ml/acre in 150-200 L water) or 0.1 ml/L for nursery drenching.",
+    "pre_harvest_interval_days": 21,
+    "safety_precautions": "Highly toxic to bees and aquatic organisms. Avoid spraying when flowering crops are in bloom. Wear chemical-resistant gloves and protective apron.",
+    "cibrc_status": "Registered under CIBRC with restricted usage near apiaries."
+  },
+  {
+    "id": "PEST_003",
+    "trade_or_common_name": "Tricyclazole 75% WP (Beam / Baan)",
+    "category": "Systemic Fungicide (Triazole)",
+    "target_pests": "Paddy Blast (Leaf Blast, Neck Blast, Node Blast caused by Pyricularia oryzae).",
+    "recommended_dosage": "0.6 g per Liter of water (120 g/acre in 200 L water). Seed treatment @ 2.0 g/kg seed.",
+    "pre_harvest_interval_days": 30,
+    "safety_precautions": "Do not inhale dust particles. Use protective mask while measuring and mixing powder. Dispose of empty packets responsibly according to CIBRC guidelines.",
+    "cibrc_status": "Registered for rice crop blast management."
+  },
+  {
+    "id": "PEST_004",
+    "trade_or_common_name": "Mancozeb 75% WP (Dithane M-45 / Indofil M-45)",
+    "category": "Broad-spectrum Contact Fungicide (Dithiocarbamate)",
+    "target_pests": "Early Blight, Late Blight, Anthracnose, Leaf Spots, Downy Mildew, Rust in Tomato, Potato, Chilli, Grapes, and Groundnut.",
+    "recommended_dosage": "2.0 to 2.5 g per Liter of water (400-500 g/acre in 200 L water).",
+    "pre_harvest_interval_days": 7,
+    "safety_precautions": "Contact protective fungicide; requires uniform foliage coverage. Wear protective footwear, eye protection, and full-length clothing. Wash skin thoroughly post-application.",
+    "cibrc_status": "Standard registered multi-site contact fungicide."
+  },
+  {
+    "id": "PEST_005",
+    "trade_or_common_name": "Neem Oil 10,000 PPM (Azadirachtin 1% EC)",
+    "category": "Organic / Botanical Bio-pesticide",
+    "target_pests": "Whiteflies, Aphids, Mites, Thrips, Leaf Miners, early instar Caterpillars, and soft-bodied sucking insects across all vegetable, fruit, and field crops.",
+    "recommended_dosage": "3.0 to 5.0 ml per Liter of water + 1 ml/L organic soap/surfactant sticker.",
+    "pre_harvest_interval_days": 0,
+    "safety_precautions": "Eco-friendly, safe for beneficial insects, pollinators, and soil microbes. Spray during early morning or late evening hours to prevent photodegradation.",
+    "cibrc_status": "Certified for Organic and IPM (Integrated Pest Management) programs."
+  },
+  {
+    "id": "PEST_006",
+    "trade_or_common_name": "Emamectin Benzoate 5% SG (Proclaim / Missel)",
+    "category": "Bio-derived Insecticide (Avermectin group)",
+    "target_pests": "Spodoptera litura (Tobacco Caterpillar), Helicoverpa armigera (Pod/Fruit Borer), Diamondback moth in pulses, vegetables, and cotton.",
+    "recommended_dosage": "0.4 to 0.5 g per Liter of water (80-100 g/acre in 200 L water).",
+    "pre_harvest_interval_days": 5,
+    "safety_precautions": "Translaminar action requires good foliage wetness. Avoid direct skin contact. Store in cool, dry place away from direct sunlight.",
+    "cibrc_status": "Approved for borer complex across vegetables and pulses."
+  },
+  {
+    "id": "PEST_007",
+    "trade_or_common_name": "Copper Oxychloride 50% WP (Blitox / Fytolan)",
+    "category": "Broad Spectrum Inorganic Contact Fungicide & Bactericide",
+    "target_pests": "Bacterial leaf blight, black arm in cotton, citrus canker, anthracnose, downy mildew, and damping off.",
+    "recommended_dosage": "2.5 to 3.0 g per Liter of water. For soil drenching: 3.0 g/L.",
+    "pre_harvest_interval_days": 10,
+    "safety_precautions": "Do not mix with strongly alkaline solutions or organophosphates. Wear protective eye gear. Wash spray equipment thoroughly after use.",
+    "cibrc_status": "Registered fungicide & bactericide."
+  }
+]

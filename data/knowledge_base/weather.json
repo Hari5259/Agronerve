@@ -1,0 +1,34 @@
+[
+  {
+    "id": "WEATH_001",
+    "weather_condition": "Heavy Rainfall / Monsoon Storm Expected",
+    "cached_forecast_window": "Next 24 to 72 Hours (Precipitation Probability > 70%)",
+    "spray_advisory": "SUSPEND all foliar chemical and fertilizer spraying immediately. Rain wash-off will cause complete chemical wastage and potential groundwater runoff contamination.",
+    "field_operations": "Ensure proper drainage channels in low-lying crop fields to prevent waterlogging. Delay harvesting of standing crops if feasible or move harvested produce to dry storage.",
+    "disease_alert": "Post-rain high humidity triggers fungal spore germination (Blast, Phytophthora, Downy Mildew). Plan preventative systemic fungicide spray once leaf surfaces dry."
+  },
+  {
+    "id": "WEATH_002",
+    "weather_condition": "High Temperature Heatwave (> 38°C) with Low Humidity (< 35%)",
+    "cached_forecast_window": "Summer / Pre-Monsoon Peak Days",
+    "spray_advisory": "Do not apply chemical sprays during peak afternoon hours (11:00 AM - 4:00 PM). High temperature causes rapid droplet evaporation and severe chemical scorch / phytotoxicity on crop leaves. Spray only between 6:00-8:30 AM or 5:00-6:30 PM.",
+    "field_operations": "Provide light, frequent evening irrigations. Apply straw mulch or biomass cover around vegetable root zones to retain soil moisture and reduce root zone heat stress.",
+    "disease_alert": "Watch for rapid spider mite and whitefly population spikes under hot and dry conditions."
+  },
+  {
+    "id": "WEATH_003",
+    "weather_condition": "Overcast Sky, High Relative Humidity (> 85%) with Light Drizzle / Fog",
+    "cached_forecast_window": "Winter Morning / Post-Monsoon Transition",
+    "spray_advisory": "High disease risk window. Apply protective systemic fungicides (e.g., Mancozeb, Hexaconazole, Azoxystrobin) with a silicone-based non-ionic wetting sticker during non-rain intervals.",
+    "field_operations": "Avoid excessive overhead sprinkler irrigation which increases canopy moisture duration.",
+    "disease_alert": "High vulnerability window for Powdery Mildew, Late Blight in Tomato/Potato, and Rust in Wheat."
+  },
+  {
+    "id": "WEATH_004",
+    "weather_condition": "High Wind Speeds (> 20 km/h)",
+    "cached_forecast_window": "Pre-Storm / Cyclonic Transition",
+    "spray_advisory": "PROHIBIT all pesticide spraying during gusty winds. Wind drift causes serious chemical loss, uneven coverage, and toxic drift hazards to neighboring fields and dwellings.",
+    "field_operations": "Provide physical staking and earthing-up support for tall crops (Sugarcane, Banana, Maize, Tomato trellis). Check greenhouse / polyhouse plastic sheet anchoring.",
+    "disease_alert": "Wind-borne spread of fungal urediniospores and bacterial droplets."
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "IRR_001",
+    "crop": "Paddy (Rice)",
+    "growth_stages": {
+      "transplanting_to_tillering": "Maintain 2-3 cm shallow standing water layer for seedling establishment and tillering.",
+      "panicle_initiation_to_flowering": "Critical water stage: Maintain 5 cm continuous standing water. Water stress here causes high spikelet sterility.",
+      "dough_to_ripening": "Maintain saturated soil (alternate wetting and drying). Drain completely 10-14 days before harvest."
+    },
+    "soil_considerations": "Clay and clay-loam soils have high water retention. For sandy-loam soils, practice AWD (Alternate Wetting and Drying) to save 25-30% irrigation water.",
+    "total_water_requirement_mm": "1100 - 1250 mm",
+    "guidelines": "FAO-56 Irrigation and Drainage Paper No. 56 & ICAR-NRRI Water Management Protocol"
+  },
+  {
+    "id": "IRR_002",
+    "crop": "Tomato",
+    "growth_stages": {
+      "seedling_establishment": "Light daily watering (2-3 L/m²) for initial 7-10 days after transplanting.",
+      "vegetative_growth": "Irrigate at 4-6 day intervals depending on soil texture (30-35 mm per irrigation).",
+      "flowering_and_fruit_set": "CRITICAL STAGE: Uniform moisture essential. Moisture fluctuations cause Blossom End Rot (calcium deficiency) and flower abortion.",
+      "fruit_maturation_and_harvest": "Moderate irrigation; avoid sudden heavy watering which leads to fruit cracking and split skins."
+    },
+    "soil_considerations": "Well-drained sandy loam or red loamy soil with pH 6.0-7.0. Use drip irrigation with 2-4 LPH drippers spaced 30 cm apart.",
+    "total_water_requirement_mm": "400 - 600 mm",
+    "guidelines": "FAO Irrigation Guidelines for Solanaceous Vegetables"
+  },
+  {
+    "id": "IRR_003",
+    "crop": "Cotton",
+    "growth_stages": {
+      "germination_to_seedling": "First irrigation 3-4 weeks after sowing if monsoon rain is absent.",
+      "square_formation_to_flowering": "Critical Stage 1: Irrigate at 12-15 day intervals.",
+      "boll_development": "Critical Stage 2: Adequate moisture required for boll expansion and fiber length.",
+      "boll_bursting": "Cease irrigation when 20-30% bolls have opened to encourage uniform opening and prevent fungal boll rot."
+    },
+    "soil_considerations": "Deep black cotton soils (vertisols) have high moisture holding capacity; avoid over-irrigation to prevent waterlogging and root asphyxiation.",
+    "total_water_requirement_mm": "650 - 800 mm",
+    "guidelines": "CICR Nagpur & FAO-56 Crop Water Manual"
+  },
+  {
+    "id": "IRR_004",
+    "crop": "Wheat",
+    "growth_stages": {
+      "crown_root_initiation_CRI": "20-25 days after sowing (DAS) — MOST CRITICAL IRRIGATION STAGE.",
+      "tillering_stage": "40-45 DAS — essential for productive tillers.",
+      "jointing_to_booting": "60-65 DAS — determines ear head length.",
+      "flowering_heading": "80-85 DAS — critical for grain count.",
+      "milking_dough_stage": "100-105 DAS — ensures test grain weight. Avoid heavy watering in windy weather to prevent crop lodging."
+    },
+    "soil_considerations": "Loam to clay loam soils. Typically requires 4 to 6 irrigations of 60 mm each throughout the season.",
+    "total_water_requirement_mm": "350 - 450 mm",
+    "guidelines": "ICAR-IIWBR Karnal Agronomic Recommendations"
+  }
+]

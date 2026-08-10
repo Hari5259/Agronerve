@@ -1,0 +1,92 @@
+[
+  {
+    "id": "DIS_001",
+    "crop": "Paddy (Rice)",
+    "disease_name": "Blast (Magnaporthe oryzae)",
+    "symptoms": "Spindle-shaped or diamond-shaped lesions with greyish center and dark brown/reddish margins on leaves. In severe cases, lesions coalesce and kill entire leaves. Neck blast causes blackening and rotting of neck node leading to chaffy grains.",
+    "favorable_conditions": "High relative humidity (>90%), moderate temperature (20-28°C), prolonged leaf wetness, cloudy days, and excessive nitrogen application.",
+    "management": "Seed treatment with Tricyclazole 75 WP @ 2 g/kg seed. Foliar spray of Tricyclazole 75% WP @ 0.6 g/L or Isoprothiolane 40% EC @ 1.5 ml/L or Kasugamycin 3% SL @ 2.5 ml/L at first symptom appearance. Avoid excess urea application.",
+    "source": "ICAR - National Rice Research Institute & TNAU Extension"
+  },
+  {
+    "id": "DIS_002",
+    "crop": "Paddy (Rice)",
+    "disease_name": "Bacterial Leaf Blight (Xanthomonas oryzae pv. oryzae)",
+    "symptoms": "Water-soaked lesions starting from leaf tips and margins, expanding into yellow to straw-colored wavy lesions along the leaf blade. Milky bacterial ooze droplets visible on young lesions in morning hours.",
+    "favorable_conditions": "Warm temperatures (25-34°C), high humidity, windstorms, heavy rainfall, and flooded fields.",
+    "management": "Apply Streptocycline @ 0.1 g/L combined with Copper Oxychloride 50 WP @ 2.5 g/L. Drain excess water from the field. Balance nitrogen with potash (K2O) split application. Grow resistant varieties like IR64 or Swarna Sub1.",
+    "source": "ICAR - Directorate of Rice Research"
+  },
+  {
+    "id": "DIS_003",
+    "crop": "Paddy (Rice)",
+    "disease_name": "Sheath Blight (Rhizoctonia solani)",
+    "symptoms": "Oval or elliptical greenish-grey water-soaked spots on leaf sheaths near water line. Spots enlarge and turn greyish-white with dark brown margins. Sclerotia easily detach from infected sheaths.",
+    "favorable_conditions": "High temperature (28-32°C), high relative humidity (85-100%), dense canopy, and high nitrogen fertilization.",
+    "management": "Foliar spray of Validamycin 3% L @ 2.5 ml/L or Hexaconazole 5% SC @ 2 ml/L or Azoxystrobin 18.2% + Difenoconazole 11.4% SC @ 1 ml/L directed towards plant base.",
+    "source": "ICAR - Indian Institute of Rice Research"
+  },
+  {
+    "id": "DIS_004",
+    "crop": "Cotton",
+    "disease_name": "Bacterial Blight / Black Arm (Xanthomonas citri pv. malvacearum)",
+    "symptoms": "Angular water-soaked leaf spots bounded by veinlets, turning brown to black. Elongated black lesions on stems/branches (Black Arm phase) causing snapping of branches. Water-soaked oily spots on developing bolls.",
+    "favorable_conditions": "Warm humid conditions (25-30°C, RH >80%), splashing rain, and sprinkler irrigation.",
+    "management": "Acid delinting of seed with concentrated Sulphuric acid (100 ml/kg seed). Spray Copper Oxychloride 50 WP @ 2.5 g/L + Streptocycline @ 0.1 g/L at 15-day intervals upon initial symptom onset.",
+    "source": "ICAR - Central Institute for Cotton Research (CICR)"
+  },
+  {
+    "id": "DIS_005",
+    "crop": "Cotton",
+    "disease_name": "Cotton Leaf Curl Virus (CLCuV)",
+    "symptoms": "Upward or downward curling of leaf margins, thickening of main and secondary veins, and enation (leaf-like outgrowths) on the undersides of leaves. Stunted plant growth and reduced boll formation.",
+    "favorable_conditions": "High population of whitefly vector (Bemisia tabaci), dry and warm weather.",
+    "management": "Control whitefly vector by spraying Diafenthiuron 50% WP @ 1.2 g/L or Afidopyropen 50 g/L DC @ 2 ml/L or Pyriproxyfen 10% EC @ 2 ml/L. Uproot and burn virus-infected plants early. Install yellow sticky traps (15-20/acre).",
+    "source": "ICAR - CICR Nagpur & PAU Ludhiana"
+  },
+  {
+    "id": "DIS_006",
+    "crop": "Tomato",
+    "disease_name": "Early Blight (Alternaria solani)",
+    "symptoms": "Dark brown to black necrotic spots with characteristic concentric rings ('target board' appearance) on older lower leaves. Leaves turn yellow around spots and drop prematurely. Dark sunken lesions at stem base.",
+    "favorable_conditions": "Alternating wet and dry periods, warm temperatures (24-29°C), heavy dews, and frequent rains.",
+    "management": "Spray Mancozeb 75% WP @ 2.5 g/L or Chlorothalonil 75% WP @ 2 g/L or Azoxystrobin 23% SC @ 1 ml/L. Maintain crop rotation and remove lower infected leaves.",
+    "source": "ICAR - Indian Institute of Horticultural Research (IIHR)"
+  },
+  {
+    "id": "DIS_007",
+    "crop": "Tomato",
+    "disease_name": "Late Blight (Phytophthora infestans)",
+    "symptoms": "Irregular water-soaked pale green lesions on leaves and stems, turning dark brown/purplish black. Under high humidity, white downy mildew-like growth appears on lesion undersides. Brown greasy rot on green fruits.",
+    "favorable_conditions": "Cool temperatures (15-20°C) with continuous high humidity (>90%) and prolonged leaf wetness (fog/rain).",
+    "management": "Preventative spray of Mancozeb 75 WP @ 2.5 g/L or Metalaxyl 8% + Mancozeb 64% WP @ 2 g/L or Cymoxanil 8% + Mancozeb 64% WP @ 2 g/L. Avoid overhead watering.",
+    "source": "ICAR - IIHR & ICAR-CPRI"
+  },
+  {
+    "id": "DIS_008",
+    "crop": "Tomato",
+    "disease_name": "Tomato Yellow Leaf Curl Virus (TYLCV)",
+    "symptoms": "Severe stunting of plants, erect growth habit, reduced leaf size, marked upward cupping and yellowing of leaf margins, interveinal chlorosis, and heavy flower drop.",
+    "favorable_conditions": "High vector (Whitefly - Bemisia tabaci) pressure, hot and dry weather.",
+    "management": "Vector management using Imidacloprid 17.8% SL @ 0.5 ml/L or Thiamethoxam 25% WG @ 0.4 g/L. Use silver reflective mulches and 40-mesh insect-proof netting in nurseries.",
+    "source": "ICAR - IIHR Bengaluru"
+  },
+  {
+    "id": "DIS_009",
+    "crop": "Wheat",
+    "disease_name": "Yellow Rust / Stripe Rust (Puccinia striiformis)",
+    "symptoms": "Bright yellow pustules (uredinia) arranged in distinct long narrow stripes/stripes along the leaf blades and leaf sheaths. Pustules release yellow powder when rubbed.",
+    "favorable_conditions": "Cool temperatures (10-15°C), high humidity, intermittent rains, and heavy morning dew in North-Western plains.",
+    "management": "Spray Propiconazole 25% EC @ 1 ml/L or Tebuconazole 25.9% EC @ 1 ml/L upon detection of yellow stripes. Cultivate resistant wheat varieties (e.g., HD 3086, DBW 187, DBW 222).",
+    "source": "ICAR - Indian Institute of Wheat and Barley Research (IIWBR)"
+  },
+  {
+    "id": "DIS_010",
+    "crop": "Chilli",
+    "disease_name": "Anthracnose / Dieback and Fruit Rot (Colletotrichum capsici)",
+    "symptoms": "Small, circular sunken dark lesions on mature green and red fruits with concentric rings of black acervuli. Die-back of young twigs from the tip downwards (drying and turning straw-colored).",
+    "favorable_conditions": "High temperature (28-30°C) with relative humidity above 80%, cloudy weather, and overhead rain splashes.",
+    "management": "Spray Azoxystrobin 23% SC @ 1 ml/L or Tebuconazole 50% + Trifloxystrobin 25% WG @ 0.5 g/L or Copper Oxychloride @ 2.5 g/L at 10-14 day intervals.",
+    "source": "TNAU Agritech Portal & ICAR-IIHR"
+  }
+]
