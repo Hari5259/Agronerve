@@ -10,26 +10,30 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "spot": 2.5, "spots": 2.5, "yellowing": 2.0, "yellow": 1.5, "wilt": 2.5, "wilting": 2.5,
         "fungus": 3.0, "blight": 3.0, "rot": 2.5, "mildew": 3.0, "rust": 3.0, "leaf": 1.0,
         "disease": 3.0, "infection": 2.5, "symptom": 2.0, "pustule": 3.0, "blast": 3.0,
-        "canker": 3.0, "anthracnose": 3.0, "lesion": 2.5, "curling": 2.0, "ooze": 2.5
+        "canker": 3.0, "anthracnose": 3.0, "lesion": 2.5, "lesions": 2.5, "curling": 2.0,
+        "ooze": 2.5, "neck": 3.0, "sheath": 3.0, "chaffy": 3.0, "stripe": 2.5, "stripes": 2.5,
+        "drying": 2.0, "rings": 2.0
     },
     "pesticide": {
-        "pesticide": 3.5, "insecticide": 3.5, "fungicide": 3.5, "spray": 2.0, "dosage": 3.0,
-        "dose": 3.0, "chemical": 2.0, "pest": 2.5, "insect": 2.5, "worm": 2.5, "caterpillar": 3.0,
-        "aphid": 3.0, "thrips": 3.0, "whitefly": 3.0, "control": 1.5, "ml/l": 3.5, "g/l": 3.5,
-        "neem": 2.5, "coragen": 3.5, "mancozeb": 3.5, "imidacloprid": 3.5, "phi": 3.0,
-        "pre-harvest": 3.0, "toxic": 2.0, "ppe": 2.5
+        "pesticide": 3.5, "insecticide": 3.5, "fungicide": 3.5, "spray": 2.2, "spraying": 2.2,
+        "dosage": 3.0, "dose": 3.0, "chemical": 2.5, "pest": 2.5, "insect": 2.5, "worm": 2.5,
+        "caterpillar": 3.0, "aphid": 3.0, "thrips": 3.0, "whitefly": 3.0, "control": 1.5,
+        "ml/l": 3.5, "g/l": 3.5, "neem": 3.0, "coragen": 3.5, "mancozeb": 3.5, "imidacloprid": 3.5,
+        "phi": 3.0, "pre-harvest": 3.5, "toxic": 2.0, "ppe": 2.5, "organic": 2.8, "diluted": 2.5,
+        "chlorantraniliprole": 3.5, "tricyclazole": 3.5, "emamectin": 3.5, "copper": 2.5, "mix": 2.0
     },
     "weather": {
         "weather": 3.5, "rain": 3.0, "rainfall": 3.5, "temperature": 3.0, "forecast": 3.5,
         "humidity": 3.0, "wind": 3.0, "climate": 2.5, "monsoon": 3.0, "frost": 3.0,
         "heat": 2.0, "heatwave": 3.5, "drizzle": 3.0, "storm": 3.0, "cloudy": 2.5,
-        "overcast": 3.0, "dew": 2.5, "cached": 2.0
+        "overcast": 3.0, "dew": 2.5, "cached": 2.5, "speed": 2.0, "degrees": 2.5
     },
     "irrigation": {
-        "irrigation": 3.5, "water": 1.8, "watering": 2.5, "drip": 3.5, "moisture": 2.5,
-        "dry": 1.5, "soil": 2.0, "sprinkler": 3.5, "interval": 2.0, "flood": 2.5,
-        "liter": 2.0, "awd": 3.5, "evapotranspiration": 3.5, "fao": 2.5, "tillering": 1.8,
-        "clay": 2.0, "loam": 2.0, "schedule": 2.0
+        "irrigation": 3.5, "water": 1.8, "watering": 3.0, "drip": 3.5, "moisture": 2.5,
+        "dry": 1.5, "soil": 2.0, "sprinkler": 3.5, "interval": 2.5, "intervals": 2.5, "flood": 2.5,
+        "liter": 2.0, "awd": 3.5, "evapotranspiration": 3.5, "fao": 2.5, "tillering": 2.0,
+        "clay": 2.0, "loam": 2.0, "schedule": 2.5, "schedules": 2.5, "stages": 2.5, "root": 2.0,
+        "flowering": 1.5
     }
 }
 
@@ -84,7 +88,7 @@ class IntentRouter:
                     "stream": False,
                     "options": {"temperature": 0.0, "num_predict": 10}
                 },
-                timeout=4.0
+                timeout=0.8
             )
             if response.status_code == 200:
                 raw_label = response.json().get("response", "").strip().lower()
