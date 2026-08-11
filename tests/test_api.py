@@ -1,4 +1,5 @@
 import sys
+import io
 from pathlib import Path
 
 # Add project root to sys.path
@@ -7,6 +8,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import pytest
+from PIL import Image
 from fastapi.testclient import TestClient
 from api.main import app
 
@@ -23,7 +25,7 @@ def test_route_classification_endpoint():
     response = client.post("/api/route", json={"query": "How to treat yellow rust in wheat?"})
     assert response.status_code == 200
     data = response.json()
-    assert data["domain"] == "disease"
+    assert data.get("primary_domain") == "disease"
 
 def test_advisory_query_endpoint():
     response = client.post("/api/query", json={"query": "What is the dosage of Mancozeb for tomato early blight?"})
@@ -45,3 +47,29 @@ def test_knowledge_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["total"] > 0
+
+def test_sensor_telemetry_endpoint():
+    response = client.get("/api/sensor/telemetry")
+    assert response.status_code == 200
+    data = response.json()
+    assert "soil" in data
+    assert "environment" in data
+
+def test_voice_clean_endpoint():
+    response = client.post("/api/voice/clean", json={"text": "### Treatment\n* Spray Tricyclazole 75 WP."})
+    assert response.status_code == 200
+    data = response.json()
+    assert "#" not in data["cleaned_speech_text"]
+
+def test_scan_leaf_endpoint():
+    img = Image.new("RGB", (60, 60), color=(50, 150, 50))
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    buf.seek(0)
+
+    files = {"file": ("leaf.jpg", buf, "image/jpeg")}
+    response = client.post("/api/scan-leaf", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "predicted_disease" in data
