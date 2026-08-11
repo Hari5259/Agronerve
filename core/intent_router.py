@@ -23,9 +23,9 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "chlorantraniliprole": 3.5, "tricyclazole": 3.5, "emamectin": 3.5, "copper": 2.5, "mix": 2.0
     },
     "weather": {
-        "weather": 3.5, "rain": 3.0, "rainfall": 3.5, "temperature": 3.0, "forecast": 3.5,
+        "weather": 3.5, "rain": 3.5, "rains": 3.5, "raining": 3.5, "rainfall": 3.5, "temperature": 3.0, "forecast": 3.5,
         "humidity": 3.0, "wind": 3.0, "climate": 2.5, "monsoon": 3.0, "frost": 3.0,
-        "heat": 2.0, "heatwave": 3.5, "drizzle": 3.0, "storm": 3.0, "cloudy": 2.5,
+        "heat": 2.0, "heatwave": 3.5, "drizzle": 3.0, "storm": 3.0, "cloudy": 2.5, "clouds": 2.5,
         "overcast": 3.0, "dew": 2.5, "cached": 2.5, "speed": 2.0, "degrees": 2.5
     },
     "irrigation": {

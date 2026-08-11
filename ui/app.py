@@ -1,5 +1,6 @@
 import sys
 import io
+import uuid
 from pathlib import Path
 
 # Add project root to sys.path
@@ -15,10 +16,11 @@ from core.vision_analyzer import leaf_vision_scanner
 from core.sensor_telemetry import sensor_manager
 from core.translator import language_manager, SUPPORTED_LANGUAGES
 from core.voice_engine import voice_engine
+from core.session_manager import session_manager
 from evaluation.benchmark import AgroNerveBenchmark
 
 st.set_page_config(
-    page_title="AgroNerve - Offline Agricultural Advisory",
+    page_title="AgroNerve - Multimodal Agricultural AI",
     page_icon="🌾",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,7 +31,7 @@ st.markdown("""
 <style>
     .main-header {
         background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
-        padding: 1.4rem 2rem;
+        padding: 1.3rem 2rem;
         border-radius: 12px;
         color: white;
         margin-bottom: 1.2rem;
@@ -60,12 +62,12 @@ st.markdown("""
     .badge-irrigation { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .badge-composite { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
     .badge-general { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-    .sensor-card {
-        background-color: #f8fafc;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
+    .upload-box {
+        background: #f0fdf4;
+        border: 1.5px dashed #86efac;
         padding: 1rem;
-        margin-bottom: 0.8rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -74,6 +76,9 @@ st.markdown("""
 if "orchestrator" not in st.session_state:
     st.session_state.orchestrator = AgentOrchestrator()
 
+if "session_id" not in st.session_state:
+    st.session_state.session_id = f"session_{uuid.uuid4().hex[:8]}"
+
 if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "en"
 
@@ -81,8 +86,9 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "👋 **Welcome to AgroNerve!**\n\nI am your offline agricultural expert. I automatically detect query intent and assemble specialized agents for:\n- 🌿 **Crop Disease Diagnosis**\n- 🧪 **Pesticide & Safety Dosage**\n- 🌦️ **Weather Operations**\n- 💧 **Irrigation Scheduling**\n- ⚡ **Composite Multi-Domain Inquiries**\n\nHow can I help your farm today?",
-            "meta": None
+            "content": "👋 **Welcome to AgroNerve Multimodal AI!**\n\nYou can **type any farming question** or **attach a picture of your crop leaf** (e.g. Tomato, Paddy, Cotton) below.\n\nI will diagnose the plant disease, quantify foliar damage %, provide verified ICAR treatments, and let you continue chatting with full conversation memory!",
+            "meta": None,
+            "image": None
         }
     ]
 
@@ -101,13 +107,24 @@ with st.sidebar:
             st.session_state.selected_lang = code
 
     st.markdown("---")
-    st.markdown("### ⚙️ System Status")
-    total_chunks = len(KnowledgeChunker.get_all_chunks())
-    c1, c2 = st.columns(2)
-    with c1:
-        st.metric(label="Knowledge Chunks", value=total_chunks)
-    with c2:
-        st.metric(label="Offline Status", value="Ready 🟢")
+    st.markdown("### 🧠 Active Chat Context")
+    sess = session_manager.get_or_create_session(st.session_state.session_id)
+    st.caption(f"Session ID: `{st.session_state.session_id}`")
+    st.write(f"🌱 **Crop:** {sess.current_crop or 'None detected yet'}")
+    st.write(f"🔬 **Diagnosed:** {sess.current_diagnosed_disease or 'None'}")
+    
+    if st.button("🔄 Reset Conversation Memory", use_container_width=True):
+        session_manager.clear_session(st.session_state.session_id)
+        st.session_state.session_id = f"session_{uuid.uuid4().hex[:8]}"
+        st.session_state.messages = [
+            {
+                "role": "assistant",
+                "content": "Conversation memory reset! How can I assist you with your crops today?",
+                "meta": None,
+                "image": None
+            }
+        ]
+        st.rerun()
 
     st.markdown("---")
     st.markdown("### 💡 Quick Sample Queries")
@@ -125,7 +142,7 @@ with st.sidebar:
             selected_sample = query
 
     st.markdown("---")
-    st.caption("AgroNerve v1.0.0 • 100% Offline Edge Advisory")
+    st.caption("AgroNerve v1.1.0 • Multimodal Edge AI Advisory")
 
 current_lang = st.session_state.selected_lang
 
@@ -147,11 +164,48 @@ tab_chat, tab_scan, tab_sensor, tab_kb, tab_calc, tab_bench = st.tabs([
     "📊 " + language_manager.get_text('bench_tab', current_lang)
 ])
 
-# ----------------- TAB 1: ADVISORY CHAT -----------------
+# ----------------- TAB 1: ADVISORY CHAT WITH MULTIMODAL VISION -----------------
 with tab_chat:
+    # Photo attachment expander directly in Chat
+    with st.expander("📷 **Attach / Capture Crop Leaf Photo for AI Diagnosis**", expanded=False):
+        uploaded_chat_photo = st.file_uploader(
+            "Upload a leaf image (Tomato, Paddy, Cotton, Wheat, Chilli):", 
+            type=["jpg", "jpeg", "png"],
+            key="chat_uploader"
+        )
+        photo_query = st.text_input("Optional question about this leaf image:", placeholder="e.g., What disease is this and how do I cure it?")
+        if uploaded_chat_photo and st.button("🚀 Analyze Leaf Image & Send to AI Chat", key="btn_send_photo"):
+            photo_bytes = uploaded_chat_photo.read()
+            with st.spinner("Analyzing foliar visual patterns & retrieving ICAR management protocols..."):
+                mm_res = st.session_state.orchestrator.process_multimodal_turn(
+                    image_bytes=photo_bytes,
+                    user_text=photo_query or "Please analyze this leaf photograph and provide diagnosis and cure.",
+                    session_id=st.session_state.session_id
+                )
+                
+                # Append user image message
+                st.session_state.messages.append({
+                    "role": "user",
+                    "content": photo_query or "Uploaded crop leaf image for diagnosis.",
+                    "meta": {"has_image": True},
+                    "image": photo_bytes
+                })
+                # Append assistant response
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": mm_res["response"],
+                    "meta": mm_res,
+                    "image": None
+                })
+                st.rerun()
+
+    # Render chat message stream
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
-            if msg.get("meta"):
+            if msg.get("image"):
+                st.image(msg["image"], caption="Attached Leaf Photo", width=250)
+
+            if msg.get("meta") and msg["role"] == "assistant":
                 meta = msg["meta"]
                 domain = meta.get("domain", "general")
                 is_multi = meta.get("is_multi_domain", False)
@@ -183,13 +237,16 @@ with tab_chat:
     prompt_to_process = selected_sample or user_input
 
     if prompt_to_process:
-        st.session_state.messages.append({"role": "user", "content": prompt_to_process, "meta": None})
+        st.session_state.messages.append({"role": "user", "content": prompt_to_process, "meta": None, "image": None})
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
 
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing intent, retrieving ICAR/FAO knowledge, and assembling agent..."):
-                res = st.session_state.orchestrator.process_query(prompt_to_process)
+            with st.spinner("Thinking & generating agricultural advisory..."):
+                res = st.session_state.orchestrator.process_query(
+                    prompt_to_process, 
+                    session_id=st.session_state.session_id
+                )
 
                 domain = res["domain"]
                 is_multi = res.get("is_multi_domain", False)
@@ -216,7 +273,8 @@ with tab_chat:
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": res["response"],
-                    "meta": res
+                    "meta": res,
+                    "image": None
                 })
 
 # ----------------- TAB 2: VISUAL LEAF SCANNER -----------------
@@ -224,7 +282,7 @@ with tab_scan:
     st.subheader("📸 Offline Leaf Disease Visual Diagnostic Scanner")
     st.write("Upload or capture a photograph of an affected crop leaf to analyze chlorosis, necrotic lesion density, and obtain immediate verified treatments.")
 
-    uploaded_img = st.file_uploader("Upload Leaf Photo (JPG/PNG):", type=["jpg", "jpeg", "png"])
+    uploaded_img = st.file_uploader("Upload Leaf Photo (JPG/PNG):", type=["jpg", "jpeg", "png"], key="scanner_tab_upload")
     col_crop, col_scan = st.columns([2, 1])
     with col_crop:
         crop_hint = st.selectbox("Select Crop Type (optional):", ["Auto-detect", "Paddy (Rice)", "Tomato", "Cotton", "Wheat", "Chilli"])

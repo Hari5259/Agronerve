@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -7,6 +7,7 @@ from core.orchestrator import AgentOrchestrator, DOMAIN_CONFIGS
 from core.knowledge_seeder import KnowledgeChunker
 from core.intent_router import IntentRouter
 from core.multi_domain_router import MultiDomainRouter
+from core.session_manager import session_manager
 from core.vision_analyzer import leaf_vision_scanner
 from core.sensor_telemetry import sensor_manager
 from core.translator import language_manager, SUPPORTED_LANGUAGES
@@ -15,9 +16,9 @@ from evaluation.benchmark import AgroNerveBenchmark
 from config import settings
 
 app = FastAPI(
-    title="AgroNerve API",
-    description="Intelligent Offline Agricultural Advisory System API using Dynamic Agent Orchestration & RAG",
-    version="1.0.0",
+    title="AgroNerve Multimodal Agricultural Advisory API",
+    description="Offline Agricultural Advisory System API with Multimodal Vision, Dynamic Agent Orchestration & Session Continuity",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -39,9 +40,11 @@ benchmark_runner = AgroNerveBenchmark()
 # Schemas
 class QueryRequest(BaseModel):
     query: str = Field(..., json_schema_extra={"example": "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"})
+    session_id: Optional[str] = Field("default", json_schema_extra={"example": "session_123"})
     language: Optional[str] = Field("en", json_schema_extra={"example": "en"})
 
 class QueryResponse(BaseModel):
+    session_id: Optional[str] = "default"
     query: str
     domain: str
     active_domains: Optional[List[str]] = None
@@ -69,7 +72,9 @@ def health_check():
         "name": settings.APP_NAME,
         "status": "healthy",
         "mode": "offline-edge-ready",
-        "version": "1.0.0",
+        "version": "1.1.0",
+        "multimodal_vision_enabled": True,
+        "session_memory_enabled": True,
         "knowledge_base_chunks": total_chunks,
         "supported_domains": list(DOMAIN_CONFIGS.keys()),
         "supported_languages": SUPPORTED_LANGUAGES
@@ -77,11 +82,45 @@ def health_check():
 
 @app.post("/api/query", response_model=QueryResponse, tags=["Advisory"])
 def process_agricultural_query(req: QueryRequest):
-    """Processes a natural-language farmer query through dynamic agent assembly and RAG grounding."""
+    """Processes a natural-language farmer query through dynamic agent assembly with session memory."""
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
-    result = orchestrator.process_query(req.query)
+    result = orchestrator.process_query(req.query, session_id=req.session_id or "default")
     return result
+
+@app.post("/api/chat/multimodal", tags=["Multimodal Chat"])
+async def process_multimodal_chat(
+    file: UploadFile = File(...),
+    query: Optional[str] = Form(None),
+    session_id: Optional[str] = Form("default")
+):
+    """Accepts an uploaded leaf photograph along with an optional user query, performs AI diagnosis, and initiates/continues chat context."""
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    result = orchestrator.process_multimodal_turn(
+        image_bytes=image_bytes,
+        user_text=query,
+        session_id=session_id or "default"
+    )
+    return result
+
+@app.get("/api/chat/history/{session_id}", tags=["Multimodal Chat"])
+def get_chat_history(session_id: str):
+    """Retrieves conversation history and diagnosed plant context for an active session."""
+    session = session_manager.get_or_create_session(session_id)
+    return {
+        "session_id": session_id,
+        "current_crop": session.current_crop,
+        "current_diagnosed_disease": session.current_diagnosed_disease,
+        "messages": session.messages
+    }
+
+@app.delete("/api/chat/session/{session_id}", tags=["Multimodal Chat"])
+def reset_chat_session(session_id: str):
+    """Resets memory for a specific chat session."""
+    session_manager.clear_session(session_id)
+    return {"status": "success", "message": f"Session '{session_id}' cleared."}
 
 @app.post("/api/route", tags=["Routing"])
 def classify_intent_only(req: RouteRequest):
