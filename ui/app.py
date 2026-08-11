@@ -73,7 +73,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Session State Initialization
-if "orchestrator" not in st.session_state:
+if "orchestrator" not in st.session_state or not hasattr(st.session_state.orchestrator, "process_multimodal_turn"):
     st.session_state.orchestrator = AgentOrchestrator()
 
 if "session_id" not in st.session_state:
