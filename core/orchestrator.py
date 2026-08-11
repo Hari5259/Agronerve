@@ -3,6 +3,7 @@ import requests
 from typing import Dict, Any, List
 from config import settings
 from core.intent_router import IntentRouter
+from core.multi_domain_router import MultiDomainRouter
 from core.rag_pipeline import RAGPipeline
 
 from domains.disease import SYSTEM_PROMPT as DISEASE_PROMPT, post_process_disease_response
@@ -39,10 +40,11 @@ DOMAIN_CONFIGS = {
 }
 
 class AgentOrchestrator:
-    """Dynamic Agent Orchestration engine that assembles specialist agents per query."""
+    """Dynamic Agent Orchestration engine supporting single-domain and composite multi-domain agents."""
 
     def __init__(self):
         self.router = IntentRouter()
+        self.multi_router = MultiDomainRouter()
         self.rag = RAGPipeline()
 
     def _call_ollama(self, system_prompt: str, context: str, query: str) -> str:
@@ -72,65 +74,92 @@ class AgentOrchestrator:
             return res.json().get("response", "").strip()
         raise RuntimeError(f"Ollama returned status code {res.status_code}")
 
-    def _fallback_offline_synthesizer(self, domain: str, chunks: List[Dict[str, Any]], query: str) -> str:
-        """Grounded offline knowledge synthesizer when Ollama LLM server is offline."""
+    def _fallback_offline_synthesizer(self, active_domains: List[str], chunks: List[Dict[str, Any]], query: str) -> str:
+        """Grounded offline knowledge synthesizer for single and compound multi-domain queries."""
         if not chunks:
+            domain_label = " + ".join(d.capitalize() for d in active_domains)
             return (
-                f"I have analyzed your query regarding **{domain}**, but did not find matching offline knowledge entries. "
-                "Please verify the crop name or describe additional symptoms for a more precise diagnosis."
+                f"I have analyzed your query across **{domain_label}**, but did not find matching offline knowledge entries. "
+                "Please specify your crop name and symptoms or field conditions."
             )
 
-        top_chunk = chunks[0]
-        text = top_chunk.get("text", "")
+        lines = []
+        if len(active_domains) > 1:
+            domains_str = " & ".join([d.capitalize() for d in active_domains])
+            lines.append(f"**⚡ AgroNerve Composite Multi-Agent Advisory ({domains_str}):**\n")
+        else:
+            lines.append(f"Based on AgroNerve's verified agricultural database for **{active_domains[0].capitalize()} Advisory**:\n")
 
-        lines = [f"Based on AgroNerve's verified agricultural database for **{domain.capitalize()} Advisory**:\n"]
-        lines.append(text)
-
-        if len(chunks) > 1:
-            lines.append("\n**Additional Relevant Knowledge:**")
-            for chunk in chunks[1:]:
-                title = chunk.get("title") or chunk.get("crop") or "Reference"
-                lines.append(f"- **{title}**: {chunk.get('text', '').splitlines()[0]}")
+        for i, chunk in enumerate(chunks[:3]):
+            title = chunk.get("title") or chunk.get("crop") or f"Document #{i+1}"
+            lines.append(f"### 📍 {title} [{chunk.get('domain', '').capitalize()}]")
+            lines.append(chunk.get("text", "").strip())
+            lines.append("")
 
         return "\n".join(lines)
 
     def process_query(self, query: str) -> Dict[str, Any]:
-        """Main execution turn: Intent Classification -> Retrieval -> Dynamic Assembly -> Post-Processing."""
+        """Main execution turn: Intent Analysis -> Multi-Partition Retrieval -> Dynamic Assembly -> Multi-Post-Processing."""
         start_time = time.time()
 
-        # 1. Two-stage Intent Classification
-        route_meta = self.router.route(query)
-        domain = route_meta["domain"]
+        # 1. Multi-domain Intent Analysis
+        multi_meta = self.multi_router.analyze_multi_domain(query)
+        active_domains = multi_meta["active_domains"]
+        is_multi_domain = multi_meta["is_multi_domain"]
+        primary_domain = multi_meta["primary_domain"]
 
-        # 2. Domain Scoped Knowledge Retrieval
-        retrieved_chunks = self.rag.retrieve(query, domain, top_k=settings.TOP_K_RETRIEVAL)
-        context_str = self.rag.format_context(retrieved_chunks)
+        # 2. Multi-Partition Scoped Knowledge Retrieval
+        all_chunks = []
+        seen_ids = set()
+        for dom in active_domains:
+            chunks = self.rag.retrieve(query, dom, top_k=3 if is_multi_domain else settings.TOP_K_RETRIEVAL)
+            for c in chunks:
+                if c["id"] not in seen_ids:
+                    seen_ids.add(c["id"])
+                    all_chunks.append(c)
 
-        # 3. Dynamic Agent Configuration Selection
-        domain_cfg = DOMAIN_CONFIGS.get(domain, DOMAIN_CONFIGS["general"])
-        system_prompt = domain_cfg["system_prompt"]
-        post_processor = domain_cfg["post_processor"]
+        context_str = self.rag.format_context(all_chunks)
 
-        # 4. Response Generation (Ollama LLM or Grounded Synthesizer)
+        # 3. Dynamic Agent Assembly (Single or Composite)
+        if is_multi_domain:
+            agent_name = "Composite Specialist (" + " + ".join([DOMAIN_CONFIGS.get(d, {}).get("name", d) for d in active_domains]) + ")"
+            system_prompt = (
+                "You are the AgroNerve Composite Agricultural Specialist Agent.\n"
+                "The farmer's query requires joint reasoning across: " + ", ".join(active_domains) + ".\n"
+                "Synthesize a unified, step-by-step advisory addressing each domain's safety guidelines and protocols."
+            )
+        else:
+            domain_cfg = DOMAIN_CONFIGS.get(primary_domain, DOMAIN_CONFIGS["general"])
+            agent_name = domain_cfg["name"]
+            system_prompt = domain_cfg["system_prompt"]
+
+        # 4. Response Generation
         llm_engine_used = "ollama"
         try:
             raw_response = self._call_ollama(system_prompt, context_str, query)
         except Exception:
             llm_engine_used = "offline_knowledge_engine"
-            raw_response = self._fallback_offline_synthesizer(domain, retrieved_chunks, query)
+            raw_response = self._fallback_offline_synthesizer(active_domains, all_chunks, query)
 
-        # 5. Domain-Specific Post-Processing
-        final_response = post_processor(raw_response)
+        # 5. Apply Post-Processors for all active domains
+        final_response = raw_response
+        for dom in active_domains:
+            post_fn = DOMAIN_CONFIGS.get(dom, {}).get("post_processor")
+            if post_fn:
+                final_response = post_fn(final_response)
+
         elapsed_seconds = round(time.time() - start_time, 2)
 
         return {
             "query": query,
-            "domain": domain,
-            "agent_name": domain_cfg["name"],
+            "domain": primary_domain,
+            "active_domains": active_domains,
+            "is_multi_domain": is_multi_domain,
+            "agent_name": agent_name,
             "response": final_response,
-            "chunks_retrieved": len(retrieved_chunks),
-            "route_meta": route_meta,
+            "chunks_retrieved": len(all_chunks),
+            "route_meta": multi_meta,
             "engine": llm_engine_used,
             "latency_seconds": elapsed_seconds,
-            "context_preview": context_str[:300] + "..." if len(context_str) > 300 else context_str
+            "context_preview": context_str[:400] + "..." if len(context_str) > 400 else context_str
         }
