@@ -168,19 +168,29 @@ tab_chat, tab_scan, tab_sensor, tab_kb, tab_calc, tab_bench = st.tabs([
 with tab_chat:
     # Photo attachment expander directly in Chat
     with st.expander("📷 **Attach / Capture Crop Leaf Photo for AI Diagnosis**", expanded=False):
-        uploaded_chat_photo = st.file_uploader(
-            "Upload a leaf image (Tomato, Paddy, Cotton, Wheat, Chilli):", 
-            type=["jpg", "jpeg", "png"],
-            key="chat_uploader"
-        )
+        col_u1, col_u2 = st.columns([3, 2])
+        with col_u1:
+            uploaded_chat_photo = st.file_uploader(
+                "Upload a leaf image (Tomato, Paddy, Cotton, Wheat, Chilli):", 
+                type=["jpg", "jpeg", "png"],
+                key="chat_uploader"
+            )
+        with col_u2:
+            chat_crop_hint = st.selectbox(
+                "Crop Type:", 
+                ["Auto-detect", "Tomato", "Paddy (Rice)", "Cotton", "Wheat", "Chilli"],
+                key="chat_crop_select"
+            )
+
         photo_query = st.text_input("Optional question about this leaf image:", placeholder="e.g., What disease is this and how do I cure it?")
         if uploaded_chat_photo and st.button("🚀 Analyze Leaf Image & Send to AI Chat", key="btn_send_photo"):
             photo_bytes = uploaded_chat_photo.read()
             with st.spinner("Analyzing foliar visual patterns & retrieving ICAR management protocols..."):
                 mm_res = st.session_state.orchestrator.process_multimodal_turn(
                     image_bytes=photo_bytes,
-                    user_text=photo_query or "Please analyze this leaf photograph and provide diagnosis and cure.",
-                    session_id=st.session_state.session_id
+                    user_text=photo_query or f"Please analyze this leaf photograph of {chat_crop_hint if chat_crop_hint != 'Auto-detect' else 'my crop'} and suggest cure.",
+                    session_id=st.session_state.session_id,
+                    crop_hint=chat_crop_hint if chat_crop_hint != "Auto-detect" else "auto"
                 )
                 
                 # Append user image message

@@ -104,14 +104,14 @@ class AgentOrchestrator:
 
         return "\n".join(lines)
 
-    def process_multimodal_turn(self, image_bytes: bytes, user_text: Optional[str] = None, session_id: str = "default") -> Dict[str, Any]:
+    def process_multimodal_turn(self, image_bytes: bytes, user_text: Optional[str] = None, session_id: str = "default", crop_hint: str = "auto") -> Dict[str, Any]:
         """Handles an uploaded leaf image, updates session context, and generates conversational AI diagnosis."""
         start_time = time.time()
         session = session_manager.get_or_create_session(session_id)
         
-        # 1. Run visual diagnostic scan
-        crop_hint = session.current_crop or "auto"
-        vision_result = self.vision.analyze_image_bytes(image_bytes, crop_hint=crop_hint, user_query=user_text)
+        # 1. Run visual diagnostic scan with crop prioritization
+        effective_crop_hint = crop_hint if crop_hint != "auto" else (session.current_crop or "auto")
+        vision_result = self.vision.analyze_image_bytes(image_bytes, crop_hint=effective_crop_hint, user_query=user_text)
         
         # 2. Update persistent session context
         session.update_visual_context(vision_result)
