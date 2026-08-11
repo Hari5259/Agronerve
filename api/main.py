@@ -1,11 +1,16 @@
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from core.orchestrator import AgentOrchestrator, DOMAIN_CONFIGS
 from core.knowledge_seeder import KnowledgeChunker
 from core.intent_router import IntentRouter
+from core.multi_domain_router import MultiDomainRouter
+from core.vision_analyzer import leaf_vision_scanner
+from core.sensor_telemetry import sensor_manager
+from core.translator import language_manager, SUPPORTED_LANGUAGES
+from core.voice_engine import voice_engine
 from evaluation.benchmark import AgroNerveBenchmark
 from config import settings
 
@@ -17,7 +22,7 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Enable CORS for local cross-origin clients
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,15 +33,19 @@ app.add_middleware(
 
 orchestrator = AgentOrchestrator()
 router = IntentRouter()
+multi_router = MultiDomainRouter()
 benchmark_runner = AgroNerveBenchmark()
 
-# Pydantic Request & Response Schemas
+# Schemas
 class QueryRequest(BaseModel):
     query: str = Field(..., json_schema_extra={"example": "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"})
+    language: Optional[str] = Field("en", json_schema_extra={"example": "en"})
 
 class QueryResponse(BaseModel):
     query: str
     domain: str
+    active_domains: Optional[List[str]] = None
+    is_multi_domain: Optional[bool] = False
     agent_name: str
     response: str
     chunks_retrieved: int
@@ -48,11 +57,9 @@ class QueryResponse(BaseModel):
 class RouteRequest(BaseModel):
     query: str
 
-class RouteResponse(BaseModel):
-    domain: str
-    score: float
-    is_confident: bool
-    stage_used: int
+class SpeechCleanRequest(BaseModel):
+    text: str
+    language: Optional[str] = "en"
 
 @app.get("/", tags=["Health"])
 def health_check():
@@ -64,7 +71,8 @@ def health_check():
         "mode": "offline-edge-ready",
         "version": "1.0.0",
         "knowledge_base_chunks": total_chunks,
-        "supported_domains": list(DOMAIN_CONFIGS.keys())
+        "supported_domains": list(DOMAIN_CONFIGS.keys()),
+        "supported_languages": SUPPORTED_LANGUAGES
     }
 
 @app.post("/api/query", response_model=QueryResponse, tags=["Advisory"])
@@ -75,11 +83,36 @@ def process_agricultural_query(req: QueryRequest):
     result = orchestrator.process_query(req.query)
     return result
 
-@app.post("/api/route", response_model=RouteResponse, tags=["Routing"])
+@app.post("/api/route", tags=["Routing"])
 def classify_intent_only(req: RouteRequest):
-    """Performs 2-stage intent classification without running full generation."""
-    route_result = router.route(req.query)
-    return route_result
+    """Performs multi-domain intent analysis."""
+    multi_result = multi_router.analyze_multi_domain(req.query)
+    return multi_result
+
+@app.post("/api/scan-leaf", tags=["Computer Vision"])
+async def scan_leaf_image(file: UploadFile = File(...), crop_hint: str = "auto"):
+    """Accepts an uploaded leaf photograph and performs offline visual disease diagnosis."""
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    result = leaf_vision_scanner.analyze_image_bytes(image_bytes, crop_hint=crop_hint)
+    return result
+
+@app.get("/api/sensor/telemetry", tags=["IoT Sensors"])
+def get_sensor_telemetry():
+    """Returns real-time soil moisture and environmental weather sensor metrics."""
+    return sensor_manager.get_telemetry()
+
+@app.post("/api/voice/clean", tags=["Voice Engine"])
+def clean_text_for_speech(req: SpeechCleanRequest):
+    """Prepares advisory text for offline Text-to-Speech synthesis."""
+    clean = voice_engine.clean_text_for_speech(req.text)
+    return {"cleaned_speech_text": clean, "language": req.language}
+
+@app.get("/api/languages", tags=["Localization"])
+def get_languages():
+    """Returns available Indian regional languages."""
+    return {"languages": SUPPORTED_LANGUAGES}
 
 @app.get("/api/domains", tags=["Domain Configuration"])
 def get_domain_modules():

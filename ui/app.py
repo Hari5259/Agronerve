@@ -1,4 +1,5 @@
 import sys
+import io
 from pathlib import Path
 
 # Add project root to sys.path
@@ -7,8 +8,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import streamlit as st
+from PIL import Image
 from core.orchestrator import AgentOrchestrator, DOMAIN_CONFIGS
 from core.knowledge_seeder import KnowledgeChunker
+from core.vision_analyzer import leaf_vision_scanner
+from core.sensor_telemetry import sensor_manager
+from core.translator import language_manager, SUPPORTED_LANGUAGES
+from core.voice_engine import voice_engine
 from evaluation.benchmark import AgroNerveBenchmark
 
 st.set_page_config(
@@ -23,22 +29,22 @@ st.markdown("""
 <style>
     .main-header {
         background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
-        padding: 1.5rem 2rem;
+        padding: 1.4rem 2rem;
         border-radius: 12px;
         color: white;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     .main-header h1 {
         color: #d8f3dc !important;
         margin: 0;
-        font-size: 2rem;
+        font-size: 1.9rem;
         font-weight: 700;
     }
     .main-header p {
         color: #b7e4c7;
-        margin: 0.3rem 0 0 0;
-        font-size: 0.95rem;
+        margin: 0.2rem 0 0 0;
+        font-size: 0.92rem;
     }
     .domain-badge {
         display: inline-block;
@@ -52,43 +58,50 @@ st.markdown("""
     .badge-pesticide { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .badge-weather { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
     .badge-irrigation { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-composite { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
     .badge-general { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-    .stat-box {
+    .sensor-card {
         background-color: #f8fafc;
+        border-radius: 10px;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.8rem;
-        text-align: center;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize Session State
+# Session State Initialization
 if "orchestrator" not in st.session_state:
     st.session_state.orchestrator = AgentOrchestrator()
+
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "en"
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "👋 **Welcome to AgroNerve!**\n\nI am your intelligent, offline agricultural advisor. I automatically detect your query intent and dynamically assemble a domain specialist agent for:\n- 🌿 **Crop Disease Diagnosis** (ICAR guidelines)\n- 🧪 **Pesticide & Dosage Safety** (CIBRC standards)\n- 🌦️ **Weather-Aware Farming** (Cached forecasts)\n- 💧 **Irrigation Scheduling** (FAO-56 models)\n\nHow can I help your farm today?",
+            "content": "👋 **Welcome to AgroNerve!**\n\nI am your offline agricultural expert. I automatically detect query intent and assemble specialized agents for:\n- 🌿 **Crop Disease Diagnosis**\n- 🧪 **Pesticide & Safety Dosage**\n- 🌦️ **Weather Operations**\n- 💧 **Irrigation Scheduling**\n- ⚡ **Composite Multi-Domain Inquiries**\n\nHow can I help your farm today?",
             "meta": None
         }
     ]
 
-# Header Banner
-st.markdown("""
-<div class="main-header">
-    <h1>🌾 AgroNerve</h1>
-    <p>Offline Agricultural Advisory System with Dynamic Agent Orchestration & RAG</p>
-</div>
-""", unsafe_allow_html=True)
-
 # Sidebar
 with st.sidebar:
     st.image("https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80", use_container_width=True)
-    st.markdown("### ⚙️ System Status")
     
+    st.markdown("### 🌐 Regional Language")
+    selected_lang_name = st.selectbox(
+        "Choose Interface Language:",
+        list(SUPPORTED_LANGUAGES.values()),
+        index=0
+    )
+    for code, name in SUPPORTED_LANGUAGES.items():
+        if name == selected_lang_name:
+            st.session_state.selected_lang = code
+
+    st.markdown("---")
+    st.markdown("### ⚙️ System Status")
     total_chunks = len(KnowledgeChunker.get_all_chunks())
     c1, c2 = st.columns(2)
     with c1:
@@ -102,7 +115,8 @@ with st.sidebar:
         ("🌿 Paddy Blast Disease", "There are spindle-shaped brown spots with grey center on my paddy leaves"),
         ("🧪 Stem Borer Dosage", "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"),
         ("🌦️ Spray Rain Window", "Should I spray pesticide if heavy rainfall is forecasted tomorrow?"),
-        ("💧 Tomato Water Schedule", "How many days interval should I water tomato plants during flowering stage?")
+        ("💧 Tomato Water Schedule", "How many days interval should I water tomato plants during flowering stage?"),
+        ("⚡ Compound: Wilt + Rain", "My tomato crop is wilting, should I irrigate or wait for rain tomorrow?")
     ]
 
     selected_sample = None
@@ -113,65 +127,88 @@ with st.sidebar:
     st.markdown("---")
     st.caption("AgroNerve v1.0.0 • 100% Offline Edge Advisory")
 
-# Tabs for Navigation
-tab_chat, tab_kb, tab_calc, tab_bench = st.tabs([
-    "💬 Advisory Chat", 
-    "📚 Knowledge Base", 
-    "🧮 Agro-Calculators",
-    "📊 Benchmarks"
+current_lang = st.session_state.selected_lang
+
+# Header Banner
+st.markdown(f"""
+<div class="main-header">
+    <h1>🌾 {language_manager.get_text('app_title', current_lang)}</h1>
+    <p>{language_manager.get_text('tagline', current_lang)}</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Navigation Tabs
+tab_chat, tab_scan, tab_sensor, tab_kb, tab_calc, tab_bench = st.tabs([
+    "💬 " + language_manager.get_text('chat_tab', current_lang),
+    "📸 " + language_manager.get_text('scan_tab', current_lang),
+    "📡 " + language_manager.get_text('sensor_tab', current_lang),
+    "📚 " + language_manager.get_text('kb_tab', current_lang),
+    "🧮 " + language_manager.get_text('calc_tab', current_lang),
+    "📊 " + language_manager.get_text('bench_tab', current_lang)
 ])
 
+# ----------------- TAB 1: ADVISORY CHAT -----------------
 with tab_chat:
-    # Render chat message history
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             if msg.get("meta"):
                 meta = msg["meta"]
                 domain = meta.get("domain", "general")
+                is_multi = meta.get("is_multi_domain", False)
                 agent_name = meta.get("agent_name", "Specialist Agent")
                 latency = meta.get("latency_seconds", 0.0)
                 engine = meta.get("engine", "Offline Engine")
                 
-                badge_class = f"badge-{domain}" if domain in ["disease", "pesticide", "weather", "irrigation"] else "badge-general"
+                badge_class = "badge-composite" if is_multi else (f"badge-{domain}" if domain in ["disease", "pesticide", "weather", "irrigation"] else "badge-general")
                 st.markdown(
-                    f'<span class="domain-badge {badge_class}">⚡ {agent_name} ({domain.upper()}) • {latency}s [{engine}]</span>', 
+                    f'<span class="domain-badge {badge_class}">⚡ {agent_name} • {latency}s [{engine}]</span>', 
                     unsafe_allow_html=True
                 )
 
             st.markdown(msg["content"])
 
+            # Voice Speech Readout Component
+            if msg["role"] == "assistant" and len(msg["content"]) > 10:
+                speech_text = voice_engine.clean_text_for_speech(msg["content"])
+                st.components.v1.html(
+                    voice_engine.generate_html5_audio_speech_script(speech_text, lang=current_lang),
+                    height=45
+                )
+
             if msg.get("meta") and msg["meta"].get("context_preview"):
                 with st.expander("🔍 View Grounding Knowledge Chunks (RAG Context)"):
                     st.text(msg["meta"]["context_preview"])
 
-    # Chat Input handler
-    user_input = st.chat_input("Describe your crop symptom, chemical dosage query, or weather question...")
-    
-    # If user clicked a sample button, use that
+    user_input = st.chat_input(language_manager.get_text('input_placeholder', current_lang))
     prompt_to_process = selected_sample or user_input
 
     if prompt_to_process:
-        # Append User Message
         st.session_state.messages.append({"role": "user", "content": prompt_to_process, "meta": None})
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
 
-        # Process Turn
         with st.chat_message("assistant"):
             with st.spinner("Analyzing intent, retrieving ICAR/FAO knowledge, and assembling agent..."):
                 res = st.session_state.orchestrator.process_query(prompt_to_process)
 
                 domain = res["domain"]
+                is_multi = res.get("is_multi_domain", False)
                 agent_name = res["agent_name"]
                 latency = res["latency_seconds"]
                 engine = res["engine"]
-                badge_class = f"badge-{domain}" if domain in ["disease", "pesticide", "weather", "irrigation"] else "badge-general"
+                badge_class = "badge-composite" if is_multi else (f"badge-{domain}" if domain in ["disease", "pesticide", "weather", "irrigation"] else "badge-general")
 
                 st.markdown(
-                    f'<span class="domain-badge {badge_class}">⚡ {agent_name} ({domain.upper()}) • {latency}s [{engine}]</span>', 
+                    f'<span class="domain-badge {badge_class}">⚡ {agent_name} • {latency}s [{engine}]</span>', 
                     unsafe_allow_html=True
                 )
                 st.markdown(res["response"])
+
+                speech_text = voice_engine.clean_text_for_speech(res["response"])
+                st.components.v1.html(
+                    voice_engine.generate_html5_audio_speech_script(speech_text, lang=current_lang),
+                    height=45
+                )
 
                 with st.expander("🔍 View Grounding Knowledge Chunks (RAG Context)"):
                     st.text(res["context_preview"])
@@ -182,6 +219,72 @@ with tab_chat:
                     "meta": res
                 })
 
+# ----------------- TAB 2: VISUAL LEAF SCANNER -----------------
+with tab_scan:
+    st.subheader("📸 Offline Leaf Disease Visual Diagnostic Scanner")
+    st.write("Upload or capture a photograph of an affected crop leaf to analyze chlorosis, necrotic lesion density, and obtain immediate verified treatments.")
+
+    uploaded_img = st.file_uploader("Upload Leaf Photo (JPG/PNG):", type=["jpg", "jpeg", "png"])
+    col_crop, col_scan = st.columns([2, 1])
+    with col_crop:
+        crop_hint = st.selectbox("Select Crop Type (optional):", ["Auto-detect", "Paddy (Rice)", "Tomato", "Cotton", "Wheat", "Chilli"])
+
+    if uploaded_img is not None:
+        c_left, c_right = st.columns([1, 1])
+        img_bytes = uploaded_img.read()
+        with c_left:
+            st.image(img_bytes, caption="Uploaded Leaf Image", use_container_width=True)
+
+        with c_right:
+            with st.spinner("Scanning leaf visual patterns & lesion density..."):
+                scan_res = leaf_vision_scanner.analyze_image_bytes(img_bytes, crop_hint=crop_hint)
+                
+                if scan_res.get("status") == "success":
+                    st.success(f"### 🔬 Diagnosis: **{scan_res['predicted_disease']}**")
+                    st.metric("Visual Confidence", f"{scan_res['confidence_pct']}%")
+                    st.metric("Estimated Affected Leaf Area", f"{scan_res['affected_leaf_area_pct']}%")
+
+                    st.markdown("#### 📊 Foliar Surface Damage Breakdown")
+                    metrics = scan_res.get("metrics", {})
+                    st.progress(metrics.get("chlorosis_yellow_pct", 0) / 100.0, text=f"Chlorosis (Yellowing): {metrics.get('chlorosis_yellow_pct')}%")
+                    st.progress(metrics.get("necrotic_brown_pct", 0) / 100.0, text=f"Necrotic Lesions: {metrics.get('necrotic_brown_pct')}%")
+                    st.progress(metrics.get("dark_lesion_pct", 0) / 100.0, text=f"Dark Blight Spots: {metrics.get('dark_lesion_pct')}%")
+
+                    st.markdown("#### 💊 Verified ICAR Management Protocol")
+                    st.info(scan_res.get("verified_protocol", ""))
+                else:
+                    st.error(scan_res.get("message", "Error scanning leaf."))
+
+# ----------------- TAB 3: IOT SENSOR TELEMETRY -----------------
+with tab_sensor:
+    st.subheader("📡 Live Soil & Environmental Sensor Telemetry")
+    st.write("Real-time telemetry integration with on-device / Bluetooth soil probes and meteorological sensors.")
+
+    t = sensor_manager.get_telemetry()
+    soil = t["soil"]
+    env = t["environment"]
+    adv = t["agronomic_advisories"]
+
+    st.caption(f"Last Sensor Sync: `{t['timestamp']}`")
+
+    s1, s2, s3, s4 = st.columns(4)
+    s1.metric("🌱 Soil Moisture (VWC)", f"{soil['moisture_vwc_pct']}%", delta="Normal Hydration" if soil["status"] == "NORMAL" else "Alert")
+    s2.metric("🌡️ Soil Temperature", f"{soil['temperature_celsius']} °C")
+    s3.metric("☀️ Ambient Temp", f"{env['ambient_temp_celsius']} °C")
+    s4.metric("💧 Relative Humidity", f"{env['relative_humidity_pct']}%")
+
+    st.markdown("---")
+    st.markdown("#### 🚜 Dynamic Field Action Triggers")
+    
+    col_a1, col_a2 = st.columns(2)
+    with col_a1:
+        st.info(f"**💧 Irrigation Trigger:**\n\n{adv['irrigation_action']}")
+    with col_a2:
+        st.warning(f"**🦠 Pathogen Infection Risk:**\n\n{adv['pathogen_infection_risk']}")
+
+    st.success(f"**🧪 Chemical Spray Window Status:** {adv['chemical_spray_window']}")
+
+# ----------------- TAB 4: KNOWLEDGE BASE -----------------
 with tab_kb:
     st.subheader("📚 Verified Agricultural Knowledge Corpus")
     st.write("Browse locally stored and embedded agricultural datasets sourced from ICAR, FAO, and CIBRC.")
@@ -199,19 +302,20 @@ with tab_kb:
         with st.expander(f"[{chunk.get('domain', '').upper()}] {chunk.get('title', 'Document')}"):
             st.code(chunk.get("text", ""), language="markdown")
 
+# ----------------- TAB 5: AGRO-CALCULATORS -----------------
 with tab_calc:
-    st.subheader("🧮 Offline Agronomic Utility Calculators")
+    st.subheader("🧮 " + language_manager.get_text('calc_tab', current_lang))
     c1, c2 = st.columns(2)
     
     with c1:
-        st.markdown("#### 🧪 Pesticide Spray Dilution Calculator")
-        tank_size = st.number_input("Spray Tank Capacity (Liters):", min_value=1.0, value=16.0, step=1.0)
-        dosage_rate = st.number_input("Recommended Dosage Rate (ml or g per Liter):", min_value=0.1, value=0.5, step=0.1)
+        st.markdown(f"#### 🧪 {language_manager.get_text('dosage_calc', current_lang)}")
+        tank_size = st.number_input(language_manager.get_text('tank_size', current_lang), min_value=1.0, value=16.0, step=1.0)
+        dosage_rate = st.number_input(language_manager.get_text('dosage_rate', current_lang), min_value=0.1, value=0.5, step=0.1)
         total_chemical = tank_size * dosage_rate
-        st.success(f"**Required Chemical Quantity:** `{total_chemical:.2f} ml (or grams)` per tank.")
+        st.success(f"**{language_manager.get_text('calc_result', current_lang)}:** `{total_chemical:.2f} ml (or grams)` per tank.")
 
     with c2:
-        st.markdown("#### 💧 Crop Water Requirement Estimator")
+        st.markdown(f"#### 💧 {language_manager.get_text('water_calc', current_lang)}")
         crop_selected = st.selectbox("Crop Type:", ["Paddy (Rice)", "Tomato", "Cotton", "Wheat"])
         soil_selected = st.selectbox("Soil Texture:", ["Clay / Black Cotton", "Loam", "Sandy Loam"])
         area_acres = st.number_input("Field Area (Acres):", min_value=0.1, value=1.0, step=0.5)
@@ -221,6 +325,7 @@ with tab_calc:
         total_m3 = (mm_req / 1000.0) * (area_acres * 4046.86)
         st.info(f"**Total Seasonal Requirement:** ~`{mm_req} mm` (~`{total_m3:,.0f} m³` for {area_acres} acre(s))")
 
+# ----------------- TAB 6: BENCHMARKS -----------------
 with tab_bench:
     st.subheader("📊 AgroNerve Benchmark Suite")
     st.write("Evaluate two-stage intent routing accuracy and RAG recall over the 40-query test benchmark.")
