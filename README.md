@@ -105,6 +105,16 @@
    uvicorn api.main:app --reload --port 8000
    ```
 
+5. **Run the Evaluation Benchmark:**
+   ```bash
+   python evaluation/benchmark.py
+   ```
+
+6. **Run Unit & Integration Tests:**
+   ```bash
+   pytest -v
+   ```
+
 ---
 
 ## 📁 Repository Structure
@@ -112,23 +122,33 @@
 ```
 Agronerve/
 ├── .gitignore
-├── README.md
-├── requirements.txt
+├── LICENSE                     # MIT License
+├── README.md                   # Project documentation
+├── requirements.txt            # Dependencies
+├── config.py                   # App configuration & environment settings
 ├── api/
-│   └── main.py                 # FastAPI backend server
+│   └── main.py                 # FastAPI backend server with Swagger docs
 ├── ui/
-│   └── app.py                  # Streamlit chat interface
+│   └── app.py                  # Streamlit multi-tab advisory dashboard
 ├── core/
-│   ├── intent_router.py        # Two-stage intent classification
+│   ├── intent_router.py        # Two-stage intent classification engine
+│   ├── knowledge_seeder.py     # Agricultural dataset chunker & preprocessor
 │   ├── orchestrator.py         # Dynamic agent orchestration engine
-│   └── rag_pipeline.py         # ChromaDB retrieval and context injection
+│   └── rag_pipeline.py         # ChromaDB retrieval and fallback ranker
 ├── domains/
-│   ├── disease.py              # Disease diagnosis configuration & prompts
-│   ├── pesticide.py            # Pesticide dosage calculation & rules
-│   ├── weather.py              # Weather forecast reasoning
-│   └── irrigation.py           # Soil-water requirement calculations
-└── data/
-    └── knowledge_base/         # Curated agricultural domain datasets
+│   ├── disease.py              # Crop disease diagnosis profile & prompt
+│   ├── pesticide.py            # Pesticide dosage calculation & safety rules
+│   ├── weather.py              # Weather forecast reasoning & operation windows
+│   └── irrigation.py           # FAO-56 crop water requirement models
+├── data/
+│   └── knowledge_base/         # ICAR, FAO, and CIBRC domain JSON datasets
+├── evaluation/
+│   ├── benchmark.py            # Automated accuracy & confusion matrix runner
+│   └── test_queries.json       # 40-query multi-domain evaluation benchmark
+└── tests/
+    ├── test_api.py             # FastAPI endpoint integration tests
+    ├── test_rag.py             # Knowledge retrieval & chunking unit tests
+    └── test_router.py          # Intent classification & threshold tests
 ```
 
 ---
