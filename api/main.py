@@ -64,6 +64,12 @@ class SpeechCleanRequest(BaseModel):
     text: str
     language: Optional[str] = "en"
 
+class SensorTelemetryUpdate(BaseModel):
+    soil_moisture: float = Field(..., ge=0.0, le=100.0, json_schema_extra={"example": 35.5})
+    ambient_temp: float = Field(..., json_schema_extra={"example": 28.5})
+    humidity: float = Field(..., ge=0.0, le=100.0, json_schema_extra={"example": 65.0})
+    rain: bool = Field(..., json_schema_extra={"example": False})
+
 @app.get("/", tags=["Health"])
 def health_check():
     """Returns AgroNerve service health and offline readiness."""
@@ -85,14 +91,19 @@ def process_agricultural_query(req: QueryRequest):
     """Processes a natural-language farmer query through dynamic agent assembly with session memory."""
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
-    result = orchestrator.process_query(req.query, session_id=req.session_id or "default")
+    result = orchestrator.process_query(
+        req.query, 
+        session_id=req.session_id or "default", 
+        language=req.language or "en"
+    )
     return result
 
 @app.post("/api/chat/multimodal", tags=["Multimodal Chat"])
 async def process_multimodal_chat(
     file: UploadFile = File(...),
     query: Optional[str] = Form(None),
-    session_id: Optional[str] = Form("default")
+    session_id: Optional[str] = Form("default"),
+    language: Optional[str] = Form("en")
 ):
     """Accepts an uploaded leaf photograph along with an optional user query, performs AI diagnosis, and initiates/continues chat context."""
     image_bytes = await file.read()
@@ -101,7 +112,8 @@ async def process_multimodal_chat(
     result = orchestrator.process_multimodal_turn(
         image_bytes=image_bytes,
         user_text=query,
-        session_id=session_id or "default"
+        session_id=session_id or "default",
+        language=language or "en"
     )
     return result
 
@@ -141,6 +153,21 @@ async def scan_leaf_image(file: UploadFile = File(...), crop_hint: str = "auto")
 def get_sensor_telemetry():
     """Returns real-time soil moisture and environmental weather sensor metrics."""
     return sensor_manager.get_telemetry()
+
+@app.post("/api/sensor/telemetry", tags=["IoT Sensors"])
+def update_sensor_telemetry(data: SensorTelemetryUpdate):
+    """Allows remote IoT telemetry updates."""
+    sensor_manager.set_manual_telemetry(
+        soil_moisture=data.soil_moisture,
+        ambient_temp=data.ambient_temp,
+        humidity=data.humidity,
+        rain=data.rain
+    )
+    return {
+        "status": "success",
+        "message": "Telemetry state updated successfully.",
+        "telemetry": sensor_manager.get_telemetry()
+    }
 
 @app.post("/api/voice/clean", tags=["Voice Engine"])
 def clean_text_for_speech(req: SpeechCleanRequest):
