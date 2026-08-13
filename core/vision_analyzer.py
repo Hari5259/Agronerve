@@ -1,10 +1,13 @@
 import io
 import re
 import base64
+import logging
 import requests
 from typing import Dict, Any, List, Optional
 from config import settings
 from core.knowledge_seeder import KnowledgeChunker
+
+logger = logging.getLogger(__name__)
 
 CROP_KEYWORDS = {
     "Tomato": ["tomato", "thakkali", "tamatar"],
@@ -32,6 +35,7 @@ class LeafVisionAnalyzer:
 
     def _call_ollama_vision(self, image_bytes: bytes, user_query: Optional[str] = None) -> Optional[str]:
         """Attempts inference with local multimodal vision models (e.g. llava, moondream)."""
+        logger.info("Attempting local Ollama vision inference.")
         try:
             b64_image = base64.b64encode(image_bytes).decode("utf-8")
             prompt = (
@@ -52,18 +56,25 @@ class LeafVisionAnalyzer:
                 timeout=15.0
             )
             if res.status_code == 200:
-                return res.json().get("response", "").strip()
-        except Exception:
+                response_text = res.json().get("response", "").strip()
+                logger.info("Local Ollama vision inference successful.")
+                return response_text
+            else:
+                logger.warning(f"Ollama vision API returned status code {res.status_code}")
+        except Exception as e:
+            logger.warning(f"Failed to run Ollama vision inference: {str(e)}")
             pass
         return None
 
     def analyze_image_bytes(self, image_bytes: bytes, crop_hint: str = "auto", user_query: Optional[str] = None) -> Dict[str, Any]:
         """Analyzes leaf image byte data, extracts lesion & chlorosis metrics, and maps to verified crop disease knowledge."""
+        logger.info(f"Analyzing leaf image bytes with crop_hint: '{crop_hint}', user_query: '{user_query}'")
         # Check if user query contains crop name (e.g. "my tomato has spots")
         inferred_crop = self._extract_crop_from_text(user_query)
         effective_crop_hint = crop_hint
         if crop_hint.lower() == "auto" or not crop_hint:
             effective_crop_hint = inferred_crop or "auto"
+        logger.info(f"Inferred crop: '{inferred_crop}', effective crop hint: '{effective_crop_hint}'")
 
         # Try local Ollama vision if available
         ollama_vision_resp = self._call_ollama_vision(image_bytes, user_query)
@@ -104,6 +115,10 @@ class LeafVisionAnalyzer:
             healthy_pct = round((green_healthy_count / sample_count) * 100, 1)
 
             total_damage_pct = min(100.0, round(chlorosis_pct + necrotic_pct + dark_lesion_pct, 1))
+            logger.info(
+                f"Offline leaf color analysis metrics: chlorosis={chlorosis_pct}%, "
+                f"necrotic={necrotic_pct}%, dark_lesion={dark_lesion_pct}%, total_damage={total_damage_pct}%"
+            )
 
             # Diagnostic symptom inference
             detected_features = []
@@ -153,6 +168,7 @@ class LeafVisionAnalyzer:
 
             match_candidates.sort(key=lambda x: x[0], reverse=True)
             top_match = match_candidates[0][1] if match_candidates else {}
+            logger.info(f"Top disease match: '{top_match.get('title', 'None')}' (score={match_candidates[0][0] if match_candidates else 0.0})")
             
             detected_crop_final = top_match.get("crop", effective_crop_hint if effective_crop_hint != "auto" else "Crop")
             confidence = min(96.0, max(72.0, round(70.0 + (total_damage_pct * 0.25), 1)))
@@ -164,7 +180,7 @@ class LeafVisionAnalyzer:
                 f"Observed patterns: {', '.join(detected_features)}."
             )
 
-            return {
+            result = {
                 "status": "success",
                 "predicted_disease": top_match.get("title", "Suspected Foliar Blight"),
                 "crop": detected_crop_final,
@@ -180,6 +196,8 @@ class LeafVisionAnalyzer:
                 "detected_symptoms": detected_features,
                 "verified_protocol": top_match.get("text", "")
             }
+            logger.info(f"Foliar diagnostic analysis succeeded: predicted_disease='{result['predicted_disease']}', crop='{result['crop']}', confidence={result['confidence_pct']}%")
+            return result
 
         except Exception as e:
             return {
