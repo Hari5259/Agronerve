@@ -29,13 +29,13 @@ def test_process_query_propagates_language_prompt():
         orchestrator.process_query("pesticide spray dosage", session_id="i18n_test_ta", language="ta")
         
         # Verify language instructions are present in the mock call system_prompt arg
-        called_args = mock_call.call_args[1]
-        assert "Tamil" in called_args["system_prompt"]
+        called_args = mock_call.call_args[0]
+        assert "Tamil" in called_args[0]
         
         # Test query in Hindi
         orchestrator.process_query("pesticide spray dosage", session_id="i18n_test_hi", language="hi")
-        called_args_hi = mock_call.call_args[1]
-        assert "Hindi" in called_args_hi["system_prompt"]
+        called_args_hi = mock_call.call_args[0]
+        assert "Hindi" in called_args_hi[0]
 
 def test_fallback_offline_synthesizer_i18n():
     orchestrator = AgentOrchestrator()
