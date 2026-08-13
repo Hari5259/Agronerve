@@ -1,4 +1,5 @@
 import time
+import logging
 import requests
 from typing import Dict, Any, List, Optional
 from config import settings
@@ -7,11 +8,14 @@ from core.multi_domain_router import MultiDomainRouter
 from core.rag_pipeline import RAGPipeline
 from core.session_manager import session_manager
 from core.vision_analyzer import leaf_vision_scanner
+from core.translator import language_manager
 
 from domains.disease import SYSTEM_PROMPT as DISEASE_PROMPT, post_process_disease_response
 from domains.pesticide import SYSTEM_PROMPT as PESTICIDE_PROMPT, post_process_pesticide_response
 from domains.weather import SYSTEM_PROMPT as WEATHER_PROMPT, post_process_weather_response
 from domains.irrigation import SYSTEM_PROMPT as IRRIGATION_PROMPT, post_process_irrigation_response
+
+logger = logging.getLogger(__name__)
 
 DOMAIN_CONFIGS = {
     "disease": {
@@ -79,19 +83,26 @@ class AgentOrchestrator:
             return res.json().get("response", "").strip()
         raise RuntimeError(f"Ollama returned status code {res.status_code}")
 
-    def _fallback_offline_synthesizer(self, active_domains: List[str], chunks: List[Dict[str, Any]], query: str, visual_context: Optional[Dict[str, Any]] = None) -> str:
-        """Grounded offline knowledge synthesizer for text and visual inquiries."""
+    def _fallback_offline_synthesizer(self, active_domains: List[str], chunks: List[Dict[str, Any]], query: str, visual_context: Optional[Dict[str, Any]] = None, language: str = "en") -> str:
+        """Grounded offline knowledge synthesizer for text and visual inquiries with i18n support."""
+        logger.info(f"Using offline knowledge synthesis for query: '{query}' (language: {language})")
         lines = []
 
         if visual_context:
-            lines.append(f"📸 **Visual AI Scan Result:** {visual_context.get('ai_description', '')}")
-            lines.append(f"**Diagnostic Confidence:** {visual_context.get('confidence_pct', 85)}% | **Estimated Foliar Damage:** {visual_context.get('affected_leaf_area_pct', 20)}%\n")
+            visual_label = language_manager.get_text("visual_scan_result", language)
+            confidence_label = language_manager.get_text("diagnostic_confidence", language)
+            damage_label = language_manager.get_text("estimated_foliar_damage", language)
+            lines.append(f"📸 **{visual_label}:** {visual_context.get('ai_description', '')}")
+            lines.append(f"**{confidence_label}:** {visual_context.get('confidence_pct', 85)}% | **{damage_label}:** {visual_context.get('affected_leaf_area_pct', 20)}%\n")
 
         if len(active_domains) > 1:
+            composite_label = language_manager.get_text("composite_advisory", language)
             domains_str = " & ".join([d.capitalize() for d in active_domains])
-            lines.append(f"**⚡ AgroNerve Composite Advisory ({domains_str}):**\n")
+            lines.append(f"**⚡ {composite_label} ({domains_str}):**\n")
         elif not visual_context:
-            lines.append(f"Based on AgroNerve's verified agricultural database for **{active_domains[0].capitalize()} Advisory**:\n")
+            domain_advisory_base = language_manager.get_text("domain_advisory_base", language)
+            formatted_base = domain_advisory_base.format(domain=active_domains[0].capitalize())
+            lines.append(f"**{formatted_base}:**\n")
 
         if chunks:
             for i, chunk in enumerate(chunks[:2]):
@@ -100,12 +111,13 @@ class AgentOrchestrator:
                 lines.append(chunk.get("text", "").strip())
                 lines.append("")
         elif not visual_context:
-            lines.append("I have analyzed your query, but did not find matching knowledge entries. Please provide additional crop symptoms or field details.")
+            lines.append(language_manager.get_text("no_knowledge_found", language))
 
         return "\n".join(lines)
 
-    def process_multimodal_turn(self, image_bytes: bytes, user_text: Optional[str] = None, session_id: str = "default", crop_hint: str = "auto") -> Dict[str, Any]:
+    def process_multimodal_turn(self, image_bytes: bytes, user_text: Optional[str] = None, session_id: str = "default", crop_hint: str = "auto", language: str = "en") -> Dict[str, Any]:
         """Handles an uploaded leaf image, updates session context, and generates conversational AI diagnosis."""
+        logger.info(f"Processing multimodal turn for session '{session_id}' in language '{language}'")
         start_time = time.time()
         session = session_manager.get_or_create_session(session_id)
         
@@ -127,21 +139,27 @@ class AgentOrchestrator:
         effective_query = user_text or f"Please analyze this leaf photograph of my {detected_crop} crop and suggest treatment."
         history_str = session.get_conversation_history_prompt()
 
+        lang_instruction = language_manager.get_language_prompt_instruction(language)
+        effective_system_prompt = DISEASE_PROMPT + lang_instruction
+
         llm_engine_used = "ollama"
         try:
+            logger.info("Sending multimodal context query to local LLM.")
             raw_response = self._call_ollama(
-                system_prompt=DISEASE_PROMPT,
+                system_prompt=effective_system_prompt,
                 context=context_str,
                 history=history_str,
                 query=f"[Farmer sent leaf image]: {effective_query}\nVisual findings: {vision_result.get('ai_description')}"
             )
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Ollama generation failed: {str(e)}. Falling back to offline vision synthesis.")
             llm_engine_used = "offline_vision_engine"
             raw_response = self._fallback_offline_synthesizer(
                 active_domains=["disease"],
                 chunks=retrieved_chunks,
                 query=effective_query,
-                visual_context=vision_result
+                visual_context=vision_result,
+                language=language
             )
 
         final_response = post_process_disease_response(raw_response)
@@ -151,6 +169,7 @@ class AgentOrchestrator:
         session.add_message("assistant", final_response, {"domain": "disease", "vision_result": vision_result})
 
         elapsed_seconds = round(time.time() - start_time, 2)
+        logger.info(f"Multimodal turn completed in {elapsed_seconds}s using {llm_engine_used}.")
 
         return {
             "session_id": session_id,
@@ -167,8 +186,9 @@ class AgentOrchestrator:
             "context_preview": context_str[:400] + "..." if len(context_str) > 400 else context_str
         }
 
-    def process_query(self, query: str, session_id: str = "default") -> Dict[str, Any]:
+    def process_query(self, query: str, session_id: str = "default", language: str = "en") -> Dict[str, Any]:
         """Main execution turn: Contextual Multi-turn Query Processing with Session Memory."""
+        logger.info(f"Processing query '{query}' for session '{session_id}' in language '{language}'")
         start_time = time.time()
         session = session_manager.get_or_create_session(session_id)
 
@@ -209,13 +229,18 @@ class AgentOrchestrator:
             agent_name = domain_cfg["name"]
             system_prompt = domain_cfg["system_prompt"]
 
+        lang_instruction = language_manager.get_language_prompt_instruction(language)
+        effective_system_prompt = system_prompt + lang_instruction
+
         # 4. Response Generation
         llm_engine_used = "ollama"
         try:
-            raw_response = self._call_ollama(system_prompt, context_str, history_str, query)
-        except Exception:
+            logger.info("Sending query to local LLM.")
+            raw_response = self._call_ollama(effective_system_prompt, context_str, history_str, query)
+        except Exception as e:
+            logger.warning(f"Ollama generation failed: {str(e)}. Falling back to offline synthesis.")
             llm_engine_used = "offline_knowledge_engine"
-            raw_response = self._fallback_offline_synthesizer(active_domains, all_chunks, query)
+            raw_response = self._fallback_offline_synthesizer(active_domains, all_chunks, query, language=language)
 
         # 5. Apply Post-Processors
         final_response = raw_response
@@ -229,6 +254,7 @@ class AgentOrchestrator:
         session.add_message("assistant", final_response, {"domain": primary_domain, "active_domains": active_domains})
 
         elapsed_seconds = round(time.time() - start_time, 2)
+        logger.info(f"Query turn completed in {elapsed_seconds}s using {llm_engine_used}.")
 
         return {
             "session_id": session_id,
