@@ -73,3 +73,17 @@ def test_scan_leaf_endpoint():
     data = response.json()
     assert data["status"] == "success"
     assert "predicted_disease" in data
+
+def test_update_sensor_telemetry_endpoint():
+    response = client.post("/api/sensor/telemetry", json={
+        "soil_moisture": 22.5,
+        "ambient_temp": 32.0,
+        "humidity": 45.0,
+        "rain": False
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["telemetry"]["soil"]["moisture_vwc_pct"] == 22.5
+    assert "CRITICAL WATER STRESS" in data["telemetry"]["agronomic_advisories"]["irrigation_action"]
+
