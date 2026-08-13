@@ -1,8 +1,11 @@
 import math
 import re
+import logging
 from typing import List, Dict, Any, Optional
 from config import settings
 from core.knowledge_seeder import KnowledgeChunker
+
+logger = logging.getLogger(__name__)
 
 class RAGPipeline:
     """Retrieval-Augmented Generation pipeline using ChromaDB domain partitions with local fallback."""
@@ -19,6 +22,7 @@ class RAGPipeline:
         self.collections: Dict[str, Any] = {}
         try:
             import chromadb
+            logger.info(f"Initializing ChromaDB client at persist_dir: '{self.persist_dir}'")
             self.chroma_client = chromadb.PersistentClient(path=self.persist_dir)
             for domain in ["disease", "pesticide", "weather", "irrigation"]:
                 col = self.chroma_client.get_or_create_collection(
@@ -30,18 +34,22 @@ class RAGPipeline:
                 if col.count() == 0:
                     domain_chunks = [c for c in self.chunks if c["domain"] == domain]
                     if domain_chunks:
+                        logger.info(f"Seeding {len(domain_chunks)} chunks for domain: '{domain}'")
                         col.add(
                             ids=[c["id"] for c in domain_chunks],
                             documents=[c["text"] for c in domain_chunks],
                             metadatas=[c.get("metadata", {}) for c in domain_chunks]
                         )
-        except Exception:
+            logger.info("ChromaDB partitions initialized and seeded successfully.")
+        except Exception as e:
             # Fallback gracefully to offline in-memory partitioned retrieval
+            logger.warning(f"ChromaDB initialization failed: {str(e)}. Falling back to in-memory matching.")
             self.chroma_client = None
 
     def retrieve(self, query: str, domain: str, top_k: Optional[int] = None) -> List[Dict[str, Any]]:
         """Retrieve relevant domain knowledge chunks for a query."""
         k = top_k or self.top_k
+        logger.info(f"RAG retrieval query: '{query}' for domain: '{domain}' (top_k={k})")
 
         # 1. Try ChromaDB retrieval if available
         if self.chroma_client and domain in self.collections:
@@ -53,8 +61,10 @@ class RAGPipeline:
                 if results and "documents" in results and results["documents"] and results["documents"][0]:
                     docs = results["documents"][0]
                     ids = results["ids"][0] if "ids" in results else [f"doc_{i}" for i in range(len(docs))]
+                    logger.info(f"ChromaDB retrieval successful. Found {len(docs)} chunks.")
                     return [{"id": id_, "text": doc, "domain": domain} for id_, doc in zip(ids, docs)]
-            except Exception:
+            except Exception as e:
+                logger.warning(f"ChromaDB retrieval failed for query '{query}': {str(e)}. Retrying offline fallback.")
                 pass
 
         # 2. Resilient Offline Scoped Keyword & Semantic Similarity Fallback
@@ -97,7 +107,9 @@ class RAGPipeline:
 
         # Sort by score descending
         scored_chunks.sort(key=lambda x: x[0], reverse=True)
-        return [item[1] for item in scored_chunks[:top_k]]
+        results = [item[1] for item in scored_chunks[:top_k]]
+        logger.info(f"Offline retrieval completed. Found {len(results)} chunks.")
+        return results
 
     def format_context(self, chunks: List[Dict[str, Any]]) -> str:
         """Format retrieved chunks into a prompt-ready context string."""
