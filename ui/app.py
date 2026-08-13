@@ -102,9 +102,18 @@ with st.sidebar:
         list(SUPPORTED_LANGUAGES.values()),
         index=0
     )
+    old_lang = st.session_state.selected_lang
     for code, name in SUPPORTED_LANGUAGES.items():
         if name == selected_lang_name:
             st.session_state.selected_lang = code
+
+    if old_lang != st.session_state.selected_lang:
+        # If the only message is the welcome message, localize it dynamically
+        if len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
+            if st.session_state.selected_lang == "en":
+                st.session_state.messages[0]["content"] = "👋 **Welcome to AgroNerve Multimodal AI!**\n\nYou can **type any farming question** or **attach a picture of your crop leaf** (e.g. Tomato, Paddy, Cotton) below.\n\nI will diagnose the plant disease, quantify foliar damage %, provide verified ICAR treatments, and let you continue chatting with full conversation memory!"
+            else:
+                st.session_state.messages[0]["content"] = f"👋 **{language_manager.get_text('welcome_msg', st.session_state.selected_lang)}**"
 
     st.markdown("---")
     st.markdown("### 🧠 Active Chat Context")
@@ -190,7 +199,8 @@ with tab_chat:
                     image_bytes=photo_bytes,
                     user_text=photo_query or f"Please analyze this leaf photograph of {chat_crop_hint if chat_crop_hint != 'Auto-detect' else 'my crop'} and suggest cure.",
                     session_id=st.session_state.session_id,
-                    crop_hint=chat_crop_hint if chat_crop_hint != "Auto-detect" else "auto"
+                    crop_hint=chat_crop_hint if chat_crop_hint != "Auto-detect" else "auto",
+                    language=current_lang
                 )
                 
                 # Append user image message
@@ -255,7 +265,8 @@ with tab_chat:
             with st.spinner("Thinking & generating agricultural advisory..."):
                 res = st.session_state.orchestrator.process_query(
                     prompt_to_process, 
-                    session_id=st.session_state.session_id
+                    session_id=st.session_state.session_id,
+                    language=current_lang
                 )
 
                 domain = res["domain"]
