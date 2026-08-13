@@ -1,6 +1,9 @@
 import re
+import logging
 from typing import Literal, Dict, Any, Tuple
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 DomainType = Literal["disease", "pesticide", "weather", "irrigation", "general"]
 
@@ -63,14 +66,17 @@ class IntentRouter:
         second_domain, second_score = sorted_scores[1]
 
         if top_score == 0:
+            logger.info("Stage 1 routing completed: No matching keywords, fallback to general.")
             return "general", 0.0, False
 
         # Confident if top score >= 1.5x second score (or second score is 0 and top >= 2.0)
         is_confident = (top_score >= self.margin_threshold * second_score) if second_score > 0 else (top_score >= 2.0)
+        logger.info(f"Stage 1 routing result: top_domain={top_domain}, score={top_score}, is_confident={is_confident}")
         return top_domain, top_score, is_confident
 
     def route_stage2_llm(self, query: str) -> DomainType:
         """Stage 2: Lightweight fast LLM fallback for ambiguous queries."""
+        logger.info(f"Initiating Stage 2 LLM routing for query: '{query}'")
         try:
             import requests
             prompt = (
@@ -88,15 +94,18 @@ class IntentRouter:
                     "stream": False,
                     "options": {"temperature": 0.0, "num_predict": 10}
                 },
-                timeout=0.8
+                timeout=settings.OLLAMA_TIMEOUT
             )
             if response.status_code == 200:
                 raw_label = response.json().get("response", "").strip().lower()
                 for d in ["disease", "pesticide", "weather", "irrigation", "general"]:
                     if d in raw_label:
+                        logger.info(f"Stage 2 LLM routing successful: domain={d}")
                         return d
-        except Exception:
-            pass
+            else:
+                logger.warning(f"Ollama Stage 2 routing failed with status code: {response.status_code}")
+        except Exception as e:
+            logger.warning(f"Exception in Stage 2 LLM routing: {str(e)}")
 
         return "general"
 
