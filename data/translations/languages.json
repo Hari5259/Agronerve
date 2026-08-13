@@ -14,7 +14,13 @@
     "water_calc": "Crop Water Requirement Estimator",
     "tank_size": "Spray Tank Capacity (Liters)",
     "dosage_rate": "Recommended Dosage Rate (ml/g per Liter)",
-    "calc_result": "Required Chemical Quantity"
+    "calc_result": "Required Chemical Quantity",
+    "visual_scan_result": "Visual AI Scan Result",
+    "diagnostic_confidence": "Diagnostic Confidence",
+    "estimated_foliar_damage": "Estimated Foliar Damage",
+    "composite_advisory": "Composite Advisory",
+    "domain_advisory_base": "Based on AgroNerve's verified agricultural database for {domain} Advisory",
+    "no_knowledge_found": "I have analyzed your query, but did not find matching knowledge entries. Please provide additional crop symptoms or field details."
   },
   "ta": {
     "app_title": "அக்ரோநெர்வ் - விவசாய ஆலோசனை",
@@ -31,7 +37,13 @@
     "water_calc": "பயிர் நீர் தேவை மதிப்பீட்டாளர்",
     "tank_size": "தெளிப்பான் தொட்டி கொள்ளளவு (லிட்டர்)",
     "dosage_rate": "பரிந்துரைக்கப்பட்ட மருந்தளவு (மி.லி/கிராம் ஒரு லிட்டருக்கு)",
-    "calc_result": "தேவையான மருந்து அளவு"
+    "calc_result": "தேவையான மருந்து அளவு",
+    "visual_scan_result": "காட்சி AI ஸ்கேன் முடிவு",
+    "diagnostic_confidence": "கண்டறியும் நம்பிக்கை",
+    "estimated_foliar_damage": "மதிப்பிடப்பட்ட இலை சேதம்",
+    "composite_advisory": "கூட்டு ஆலோசனை",
+    "domain_advisory_base": "{domain} ஆலோசனைக்கான அக்ரோநெர்வின் சரிபார்க்கப்பட்ட விவசாய தரவுத்தளத்தின் அடிப்படையில்",
+    "no_knowledge_found": "உங்கள் வினவலை நான் பகுப்பாய்வு செய்தேன், ஆனால் பொருந்தக்கூடிய அறிவு உள்ளீடுகள் எதுவும் கிடைக்கவில்லை. தயவுசெய்து கூடுதல் பயிர் அறிகுறிகள் அல்லது புலம் விவரங்களை வழங்கவும்."
   },
   "hi": {
     "app_title": "एग्रोनर्व - कृषि सलाहकार",
@@ -48,7 +60,13 @@
     "water_calc": "फसल जल आवश्यकता अनुमानक",
     "tank_size": "स्प्रे टैंक क्षमता (लीटर)",
     "dosage_rate": "अनुशंसित खुराक दर (मिली/ग्राम प्रति लीटर)",
-    "calc_result": "आवश्यक कीटनाशक मात्रा"
+    "calc_result": "आवश्यक कीटनाशक मात्रा",
+    "visual_scan_result": "दृश्य AI स्कैन परिणाम",
+    "diagnostic_confidence": "नैदानिक आत्मविश्वास",
+    "estimated_foliar_damage": "अनुमानित पत्तेदार क्षति",
+    "composite_advisory": "मिश्रित सलाह",
+    "domain_advisory_base": "{domain} सलाह के लिए एग्रोनर्व के सत्यापित कृषि डेटाबेस पर आधारित",
+    "no_knowledge_found": "मैंने आपके प्रश्न का विश्लेषण किया है, लेकिन कोई मेल खाता ज्ञान प्रविष्टि नहीं मिली। कृपया अतिरिक्त फसल लक्षण या खेत का विवरण प्रदान करें।"
   },
   "te": {
     "app_title": "ఆగ్రోనెర్వ్ - వ్యవసాయ సలహా",
@@ -65,7 +83,13 @@
     "water_calc": "పంట నీటి అవసరాల అంచనా",
     "tank_size": "స్ప్రే ట్యాంక్ సామర్థ్యం (లీటర్లు)",
     "dosage_rate": "సిఫార్సు చేయబడిన మోతాదు (మి.లీ/గ్రా లీటరుకు)",
-    "calc_result": "అవసరమైన మందు పరిమాణం"
+    "calc_result": "అవసరమైన మందు పరిమాణం",
+    "visual_scan_result": "విజువల్ AI స్కాన్ ఫలితం",
+    "diagnostic_confidence": "రోగ నిర్ధారణ విశ్వసనీయత",
+    "estimated_foliar_damage": "అంచనా వేసిన ఆకు నష్టం",
+    "composite_advisory": "మిశ్రమ సలహా",
+    "domain_advisory_base": "{domain} సలహా కోసం ఆగ్రోనెర్వ్ ధృవీకరించిన వ్యవసాయ డేటాబేస్ ఆధారంగా",
+    "no_knowledge_found": "నేను మీ ప్రశ్నను విశ్లేషించాను, కానీ సరిపోలే సమాచారం కనుగోనబడలేదు. దయచేసి అదనపు పంట లక్షణాలు లేదా క్షేత్ర వివరాలను అందించండి."
   },
   "kn": {
     "app_title": "ಅಗ್ರೋನೆರ್ವ್ - ಕೃಷಿ ಸಲಹೆಗಾರ",
@@ -82,6 +106,12 @@
     "water_calc": "ಬೆಳೆ ನೀರಿನ ಅವಶ್ಯಕತೆ ಅಂದಾಜುಗಾರ",
     "tank_size": "ಸ್ಪ್ರೇ ಟ್ಯಾಂಕ್ ಸಾಮರ್ಥ್ಯ (ಲೀಟರ್)",
     "dosage_rate": "ಶಿಫಾರಸು ಮಾಡಿದ ಪ್ರಮಾಣ (ಮಿಲಿ/ಗ್ರಾಂ ಪ್ರತಿ ಲೀಟರ್‌ಗೆ)",
-    "calc_result": "ಅಗತ್ಯವಿರುವ ಔಷಧಿಯ ಪ್ರಮಾಣ"
+    "calc_result": "ಅಗತ್ಯವಿರುವ ಔಷಧಿಯ ಪ್ರಮಾಣ",
+    "visual_scan_result": "ದೃಶ್ಯ AI ಸ್ಕ್ಯಾನ್ ಫಲಿತಾಂಶ",
+    "diagnostic_confidence": "ರೋಗನಿರ್ಣಯದ ವಿಶ್ವಾಸಾರ್ಹತೆ",
+    "estimated_foliar_damage": "ಅಂದಾಜು ಎಲೆ ಹಾನಿ",
+    "composite_advisory": "ಸಂಯೋಜಿತ ಸಲಹೆ",
+    "domain_advisory_base": "{domain} ಸಲಹೆಗಾಗಿ ಅಗ್ರೋನೆರ್ವ್ ಪರಿಶೀಲಿಸಿದ ಕೃಷಿ ಡೇಟಾಬೇಸ್ ಆಧಾರಿತ",
+    "no_knowledge_found": "ನಾನು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿದ್ದೇನೆ, ಆದರೆ ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಮಾಹಿತಿ ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಹೆಚ್ಚಿನ ಬೆಳೆ ರೋಗಲಕ್ಷಣಗಳು ಅಥವಾ ವಿವರಗಳನ್ನು ಒದಗಿಸಿ."
   }
 }
