@@ -8,5 +8,6 @@ class Settings(BaseModel):
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
     CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
     TOP_K_RETRIEVAL: int = int(os.getenv("TOP_K_RETRIEVAL", "5"))
+    OLLAMA_TIMEOUT: float = float(os.getenv("OLLAMA_TIMEOUT", "3.0"))
 
 settings = Settings()
