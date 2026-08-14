@@ -178,11 +178,11 @@ class LeafVisionAnalyzer:
 
             # Diagnostic symptom inference
             detected_features = []
-            if chlorosis_pct > 15.0:
+            if chlorosis_pct > 5.0:
                 detected_features.append("Marked leaf yellowing / chlorosis")
-            if necrotic_pct > 10.0:
+            if necrotic_pct > 3.0:
                 detected_features.append("Brown necrotic target-like lesions")
-            if dark_lesion_pct > 5.0:
+            if dark_lesion_pct > 2.0:
                 detected_features.append("Dark concentrated necrotic spots")
             if not detected_features:
                 detected_features.append("Mild localized foliage discoloration")
@@ -207,7 +207,7 @@ class LeafVisionAnalyzer:
                         score -= 50.0  # Penalize mismatched crops
 
                 # Specific symptom matching
-                if necrotic_pct > 8.0:
+                if necrotic_pct > 3.0:
                     if (
                         "early blight" in title
                         or "target" in text
@@ -217,13 +217,13 @@ class LeafVisionAnalyzer:
                     elif "spot" in text or "brown" in text or "lesion" in text:
                         score += 20.0
 
-                if chlorosis_pct > 15.0:
+                if chlorosis_pct > 5.0:
                     if "curl" in title or "yellow" in title or "chlorosis" in text:
                         score += 35.0
-                    elif "yellowing" in text:
+                    elif "yellowing" in text or "yellow" in text:
                         score += 15.0
 
-                if dark_lesion_pct > 5.0:
+                if dark_lesion_pct > 2.0:
                     if "late blight" in title or "blast" in title or "black" in text:
                         score += 30.0
 
