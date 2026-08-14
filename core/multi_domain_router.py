@@ -2,6 +2,7 @@ import re
 from typing import List, Dict, Any, Tuple
 from core.intent_router import DOMAIN_WEIGHTS, DomainType
 
+
 class MultiDomainRouter:
     """Detects multi-domain composite queries and orchestrates cross-partition retrieval."""
 
@@ -17,7 +18,7 @@ class MultiDomainRouter:
 
         for domain, weights in DOMAIN_WEIGHTS.items():
             for word, weight in weights.items():
-                pattern = r'\b' + re.escape(word) + r'\b'
+                pattern = r"\b" + re.escape(word) + r"\b"
                 matches = len(re.findall(pattern, q_lower))
                 if matches > 0:
                     domain_scores[domain] += weight * matches
@@ -31,7 +32,7 @@ class MultiDomainRouter:
                 "is_multi_domain": False,
                 "primary_domain": "general",
                 "active_domains": ["general"],
-                "domain_scores": domain_scores
+                "domain_scores": domain_scores,
             }
 
         # Active domains are those exceeding the threshold or reaching >= 40% of primary score
@@ -46,5 +47,5 @@ class MultiDomainRouter:
             "is_multi_domain": is_multi,
             "primary_domain": primary_domain,
             "active_domains": active_domains,
-            "domain_scores": domain_scores
+            "domain_scores": domain_scores,
         }

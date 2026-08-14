@@ -1,6 +1,7 @@
 import re
 from typing import Dict, Any
 
+
 class VoiceEngine:
     """Processes agricultural advisories for offline speech synthesis and voice UI."""
 
@@ -8,14 +9,14 @@ class VoiceEngine:
     def clean_text_for_speech(markdown_text: str) -> str:
         """Strips markdown headers, asterisks, bullet formatting, and disclaimers for smooth natural voice readout."""
         # Remove markdown headers and URLs
-        text = re.sub(r'#+\s*', '', markdown_text)
-        text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+        text = re.sub(r"#+\s*", "", markdown_text)
+        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
         # Remove bold, italics, bullets, blockquotes
-        text = re.sub(r'[*_`>~]', '', text)
-        text = re.sub(r'--+', '', text)
+        text = re.sub(r"[*_`>~]", "", text)
+        text = re.sub(r"--+", "", text)
         # Clean multiple newlines and extra spaces
-        text = re.sub(r'\n+', '. ', text)
-        text = re.sub(r'\s+', ' ', text).strip()
+        text = re.sub(r"\n+", ". ", text)
+        text = re.sub(r"\s+", " ", text).strip()
         return text
 
     @staticmethod
@@ -27,7 +28,7 @@ class VoiceEngine:
             "ta": "ta-IN",
             "hi": "hi-IN",
             "te": "te-IN",
-            "kn": "kn-IN"
+            "kn": "kn-IN",
         }.get(lang, "en-IN")
 
         return f"""
@@ -49,5 +50,6 @@ class VoiceEngine:
             </script>
         </div>
         """
+
 
 voice_engine = VoiceEngine()

@@ -2,15 +2,18 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 
-TRANSLATION_FILE = Path(__file__).resolve().parent.parent / "data" / "translations" / "languages.json"
+TRANSLATION_FILE = (
+    Path(__file__).resolve().parent.parent / "data" / "translations" / "languages.json"
+)
 
 SUPPORTED_LANGUAGES = {
     "en": "English",
     "ta": "தமிழ் (Tamil)",
     "hi": "हिन्दी (Hindi)",
     "te": "తెలుగు (Telugu)",
-    "kn": "ಕನ್ನಡ (Kannada)"
+    "kn": "ಕನ್ನಡ (Kannada)",
 }
+
 
 class LanguageManager:
     """Manages multilingual agricultural UI labels, system prompts, and responses."""
@@ -39,5 +42,6 @@ class LanguageManager:
         elif lang == "kn":
             return "\n\nIMPORTANT: Please generate the response in clear Kannada (ಕನ್ನಡ) suitable for Karnataka farmers."
         return ""
+
 
 language_manager = LanguageManager()

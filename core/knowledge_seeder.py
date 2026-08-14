@@ -5,6 +5,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "knowledge_base"
 
+
 class KnowledgeChunker:
     """Chunks structured domain JSON data into prompt-retrievable knowledge units."""
 
@@ -25,14 +26,19 @@ class KnowledgeChunker:
                 f"Management Protocol: {item.get('management')}\n"
                 f"Source: {item.get('source')}"
             )
-            chunks.append({
-                "id": item.get("id"),
-                "domain": "disease",
-                "crop": item.get("crop"),
-                "title": item.get("disease_name"),
-                "text": text,
-                "metadata": {"type": "disease_diagnosis", "source": item.get("source")}
-            })
+            chunks.append(
+                {
+                    "id": item.get("id"),
+                    "domain": "disease",
+                    "crop": item.get("crop"),
+                    "title": item.get("disease_name"),
+                    "text": text,
+                    "metadata": {
+                        "type": "disease_diagnosis",
+                        "source": item.get("source"),
+                    },
+                }
+            )
         return chunks
 
     @staticmethod
@@ -54,13 +60,18 @@ class KnowledgeChunker:
                 f"Safety Precautions & PPE: {item.get('safety_precautions')}\n"
                 f"Regulatory Status: {item.get('cibrc_status')}"
             )
-            chunks.append({
-                "id": item.get("id"),
-                "domain": "pesticide",
-                "title": item.get("trade_or_common_name"),
-                "text": text,
-                "metadata": {"category": item.get("category"), "phi_days": item.get("pre_harvest_interval_days")}
-            })
+            chunks.append(
+                {
+                    "id": item.get("id"),
+                    "domain": "pesticide",
+                    "title": item.get("trade_or_common_name"),
+                    "text": text,
+                    "metadata": {
+                        "category": item.get("category"),
+                        "phi_days": item.get("pre_harvest_interval_days"),
+                    },
+                }
+            )
         return chunks
 
     @staticmethod
@@ -80,13 +91,15 @@ class KnowledgeChunker:
                 f"Field & Soil Operations: {item.get('field_operations')}\n"
                 f"Disease Risk Alert: {item.get('disease_alert')}"
             )
-            chunks.append({
-                "id": item.get("id"),
-                "domain": "weather",
-                "title": item.get("weather_condition"),
-                "text": text,
-                "metadata": {"event": item.get("weather_condition")}
-            })
+            chunks.append(
+                {
+                    "id": item.get("id"),
+                    "domain": "weather",
+                    "title": item.get("weather_condition"),
+                    "text": text,
+                    "metadata": {"event": item.get("weather_condition")},
+                }
+            )
         return chunks
 
     @staticmethod
@@ -99,7 +112,12 @@ class KnowledgeChunker:
 
         chunks = []
         for item in items:
-            stages_text = "\n".join([f"  - {k.replace('_', ' ').title()}: {v}" for k, v in item.get("growth_stages", {}).items()])
+            stages_text = "\n".join(
+                [
+                    f"  - {k.replace('_', ' ').title()}: {v}"
+                    for k, v in item.get("growth_stages", {}).items()
+                ]
+            )
             text = (
                 f"Crop: {item.get('crop')}\n"
                 f"Water Requirement: {item.get('total_water_requirement_mm')}\n"
@@ -107,24 +125,27 @@ class KnowledgeChunker:
                 f"Soil Texture & Dynamics: {item.get('soil_considerations')}\n"
                 f"Standard: {item.get('guidelines')}"
             )
-            chunks.append({
-                "id": item.get("id"),
-                "domain": "irrigation",
-                "crop": item.get("crop"),
-                "title": f"{item.get('crop')} Irrigation Guidelines",
-                "text": text,
-                "metadata": {"water_req": item.get("total_water_requirement_mm")}
-            })
+            chunks.append(
+                {
+                    "id": item.get("id"),
+                    "domain": "irrigation",
+                    "crop": item.get("crop"),
+                    "title": f"{item.get('crop')} Irrigation Guidelines",
+                    "text": text,
+                    "metadata": {"water_req": item.get("total_water_requirement_mm")},
+                }
+            )
         return chunks
 
     @classmethod
     def get_all_chunks(cls) -> List[Dict[str, Any]]:
         return (
-            cls.load_disease_chunks() +
-            cls.load_pesticide_chunks() +
-            cls.load_weather_chunks() +
-            cls.load_irrigation_chunks()
+            cls.load_disease_chunks()
+            + cls.load_pesticide_chunks()
+            + cls.load_weather_chunks()
+            + cls.load_irrigation_chunks()
         )
+
 
 if __name__ == "__main__":
     chunks = KnowledgeChunker.get_all_chunks()

@@ -14,8 +14,9 @@ CROP_KEYWORDS = {
     "Paddy (Rice)": ["paddy", "rice", "nellu", "dhan", "chawal"],
     "Cotton": ["cotton", "kapas", "paruthi"],
     "Wheat": ["wheat", "gehun", "godhumai"],
-    "Chilli": ["chilli", "chili", "pepper", "mirchi", "milagai"]
+    "Chilli": ["chilli", "chili", "pepper", "mirchi", "milagai"],
 }
+
 
 class LeafVisionAnalyzer:
     """Multimodal vision analyzer supporting local Ollama Vision models & robust offline crop-aware foliar symptom extraction."""
@@ -29,18 +30,20 @@ class LeafVisionAnalyzer:
         text_lower = text.lower()
         for crop_name, aliases in CROP_KEYWORDS.items():
             for alias in aliases:
-                if re.search(r'\b' + re.escape(alias) + r'\b', text_lower):
+                if re.search(r"\b" + re.escape(alias) + r"\b", text_lower):
                     return crop_name
         return None
 
-    def _call_ollama_vision(self, image_bytes: bytes, user_query: Optional[str] = None) -> Optional[str]:
+    def _call_ollama_vision(
+        self, image_bytes: bytes, user_query: Optional[str] = None
+    ) -> Optional[str]:
         """Attempts inference with local multimodal vision models (e.g. llava, moondream)."""
         logger.info("Attempting local Ollama vision inference.")
         try:
             b64_image = base64.b64encode(image_bytes).decode("utf-8")
             prompt = (
-                user_query or 
-                "You are an expert plant pathologist AI. Analyze this crop leaf photograph. "
+                user_query
+                or "You are an expert plant pathologist AI. Analyze this crop leaf photograph. "
                 "Identify the crop (e.g. Tomato, Rice, Cotton, Wheat), describe visual symptoms (lesions, chlorosis, concentric rings, spots), "
                 "diagnose the disease accurately, and state immediate ICAR management protocols."
             )
@@ -51,43 +54,59 @@ class LeafVisionAnalyzer:
                     "prompt": prompt,
                     "images": [b64_image],
                     "stream": False,
-                    "options": {"temperature": 0.2, "num_predict": 400}
+                    "options": {"temperature": 0.2, "num_predict": 400},
                 },
-                timeout=15.0
+                timeout=15.0,
             )
             if res.status_code == 200:
                 response_text = res.json().get("response", "").strip()
                 logger.info("Local Ollama vision inference successful.")
                 return response_text
             else:
-                logger.warning(f"Ollama vision API returned status code {res.status_code}")
+                logger.warning(
+                    f"Ollama vision API returned status code {res.status_code}"
+                )
         except Exception as e:
             logger.warning(f"Failed to run Ollama vision inference: {str(e)}")
             pass
         return None
 
-    def analyze_image_bytes(self, image_bytes: bytes, crop_hint: str = "auto", user_query: Optional[str] = None) -> Dict[str, Any]:
+    def analyze_image_bytes(
+        self,
+        image_bytes: bytes,
+        crop_hint: str = "auto",
+        user_query: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Analyzes leaf image byte data, extracts lesion & chlorosis metrics, and maps to verified crop disease knowledge."""
-        logger.info(f"Analyzing leaf image bytes with crop_hint: '{crop_hint}', user_query: '{user_query}'")
+        logger.info(
+            f"Analyzing leaf image bytes with crop_hint: '{crop_hint}', user_query: '{user_query}'"
+        )
         # Check if user query contains crop name (e.g. "my tomato has spots")
         inferred_crop = self._extract_crop_from_text(user_query)
         effective_crop_hint = crop_hint
         if crop_hint.lower() == "auto" or not crop_hint:
             effective_crop_hint = inferred_crop or "auto"
-        logger.info(f"Inferred crop: '{inferred_crop}', effective crop hint: '{effective_crop_hint}'")
+        logger.info(
+            f"Inferred crop: '{inferred_crop}', effective crop hint: '{effective_crop_hint}'"
+        )
 
         # Try local Ollama vision if available
         ollama_vision_resp = self._call_ollama_vision(image_bytes, user_query)
 
         try:
             from PIL import Image
+
             img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
             width, height = img.size
             total_pixels = width * height
-            
+
             # Fast offline pixel color distribution analysis
             sample_step = max(1, int((total_pixels / 10000) ** 0.5))
-            pixels = [img.getpixel((x, y)) for y in range(0, height, sample_step) for x in range(0, width, sample_step)]
+            pixels = [
+                img.getpixel((x, y))
+                for y in range(0, height, sample_step)
+                for x in range(0, width, sample_step)
+            ]
             sample_count = len(pixels) or 1
 
             yellow_count = 0
@@ -114,7 +133,9 @@ class LeafVisionAnalyzer:
             dark_lesion_pct = round((dark_spot_count / sample_count) * 100, 1)
             healthy_pct = round((green_healthy_count / sample_count) * 100, 1)
 
-            total_damage_pct = min(100.0, round(chlorosis_pct + necrotic_pct + dark_lesion_pct, 1))
+            total_damage_pct = min(
+                100.0, round(chlorosis_pct + necrotic_pct + dark_lesion_pct, 1)
+            )
             logger.info(
                 f"Offline leaf color analysis metrics: chlorosis={chlorosis_pct}%, "
                 f"necrotic={necrotic_pct}%, dark_lesion={dark_lesion_pct}%, total_damage={total_damage_pct}%"
@@ -142,14 +163,21 @@ class LeafVisionAnalyzer:
                 # Crop match weighting
                 if effective_crop_hint.lower() != "auto":
                     hint_lower = effective_crop_hint.lower()
-                    if hint_lower in crop_name.lower() or any(alias in hint_lower for alias in CROP_KEYWORDS.get(crop_name, [])):
+                    if hint_lower in crop_name.lower() or any(
+                        alias in hint_lower
+                        for alias in CROP_KEYWORDS.get(crop_name, [])
+                    ):
                         score += 150.0  # Dominant crop boost
                     else:
-                        score -= 50.0   # Penalize mismatched crops
+                        score -= 50.0  # Penalize mismatched crops
 
                 # Specific symptom matching
                 if necrotic_pct > 8.0:
-                    if "early blight" in title or "target" in text or "concentric" in text:
+                    if (
+                        "early blight" in title
+                        or "target" in text
+                        or "concentric" in text
+                    ):
                         score += 40.0
                     elif "spot" in text or "brown" in text or "lesion" in text:
                         score += 20.0
@@ -168,16 +196,26 @@ class LeafVisionAnalyzer:
 
             match_candidates.sort(key=lambda x: x[0], reverse=True)
             top_match = match_candidates[0][1] if match_candidates else {}
-            logger.info(f"Top disease match: '{top_match.get('title', 'None')}' (score={match_candidates[0][0] if match_candidates else 0.0})")
-            
-            detected_crop_final = top_match.get("crop", effective_crop_hint if effective_crop_hint != "auto" else "Crop")
-            confidence = min(96.0, max(72.0, round(70.0 + (total_damage_pct * 0.25), 1)))
+            logger.info(
+                f"Top disease match: '{top_match.get('title', 'None')}' (score={match_candidates[0][0] if match_candidates else 0.0})"
+            )
+
+            detected_crop_final = top_match.get(
+                "crop", effective_crop_hint if effective_crop_hint != "auto" else "Crop"
+            )
+            confidence = min(
+                96.0, max(72.0, round(70.0 + (total_damage_pct * 0.25), 1))
+            )
 
             # If Ollama vision gave a response, use it
-            ai_description = ollama_vision_resp if ollama_vision_resp else (
-                f"Visual scan identifies symptoms consistent with **{top_match.get('title', 'Foliar Disease')}** on **{detected_crop_final}** "
-                f"with approximately **{total_damage_pct}%** affected leaf surface area. "
-                f"Observed patterns: {', '.join(detected_features)}."
+            ai_description = (
+                ollama_vision_resp
+                if ollama_vision_resp
+                else (
+                    f"Visual scan identifies symptoms consistent with **{top_match.get('title', 'Foliar Disease')}** on **{detected_crop_final}** "
+                    f"with approximately **{total_damage_pct}%** affected leaf surface area. "
+                    f"Observed patterns: {', '.join(detected_features)}."
+                )
             )
 
             result = {
@@ -191,18 +229,21 @@ class LeafVisionAnalyzer:
                     "chlorosis_yellow_pct": chlorosis_pct,
                     "necrotic_brown_pct": necrotic_pct,
                     "dark_lesion_pct": dark_lesion_pct,
-                    "healthy_green_pct": healthy_pct
+                    "healthy_green_pct": healthy_pct,
                 },
                 "detected_symptoms": detected_features,
-                "verified_protocol": top_match.get("text", "")
+                "verified_protocol": top_match.get("text", ""),
             }
-            logger.info(f"Foliar diagnostic analysis succeeded: predicted_disease='{result['predicted_disease']}', crop='{result['crop']}', confidence={result['confidence_pct']}%")
+            logger.info(
+                f"Foliar diagnostic analysis succeeded: predicted_disease='{result['predicted_disease']}', crop='{result['crop']}', confidence={result['confidence_pct']}%"
+            )
             return result
 
         except Exception as e:
             return {
                 "status": "error",
-                "message": f"Failed to process leaf image: {str(e)}"
+                "message": f"Failed to process leaf image: {str(e)}",
             }
+
 
 leaf_vision_scanner = LeafVisionAnalyzer()
