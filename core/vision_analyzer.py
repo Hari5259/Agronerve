@@ -3,7 +3,7 @@ import re
 import base64
 import logging
 import requests
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from config import settings
 from core.knowledge_seeder import KnowledgeChunker
 
@@ -33,6 +33,32 @@ class LeafVisionAnalyzer:
                 if re.search(r"\b" + re.escape(alias) + r"\b", text_lower):
                     return crop_name
         return None
+
+    def _parse_vision_response(self, text: str) -> Tuple[Optional[str], Optional[str]]:
+        """Parses the crop and disease name from the Ollama Vision response text."""
+        text_lower = text.lower()
+        detected_crop = None
+        for crop_name, aliases in CROP_KEYWORDS.items():
+            for alias in aliases:
+                if re.search(r"\b" + re.escape(alias) + r"\b", text_lower):
+                    detected_crop = crop_name
+                    break
+            if detected_crop:
+                break
+
+        detected_disease = None
+        for item in self.disease_data:
+            disease_title = item.get("title", "")
+            clean_title = re.sub(r"\(.*?\)", "", disease_title).strip().lower()
+            if clean_title in text_lower or disease_title.lower() in text_lower:
+                detected_disease = disease_title
+                break
+            parts = clean_title.split()
+            if len(parts) >= 2 and all(p in text_lower for p in parts):
+                detected_disease = disease_title
+                break
+
+        return detected_crop, detected_disease
 
     def _call_ollama_vision(
         self, image_bytes: bytes, user_query: Optional[str] = None
@@ -116,22 +142,31 @@ class LeafVisionAnalyzer:
 
             for r, g, b in pixels:
                 # Yellow / chlorotic
-                if r > 130 and g > 130 and b < 100 and (r + g) > (2.2 * b):
+                if r > 110 and g > 110 and b < 110 and (r + g) > (2.0 * b):
                     yellow_count += 1
                 # Brown / necrotic
-                elif r > 80 and g > 40 and b < 50 and r > (1.3 * g):
+                elif r > 60 and g > 30 and b < 80 and r > (1.2 * g):
                     brown_necrotic_count += 1
                 # Dark spot / black blight
-                elif r < 60 and g < 60 and b < 60:
+                elif r < 75 and g < 75 and b < 75:
                     dark_spot_count += 1
                 # Healthy green
-                elif g > r and g > b and g > 70:
+                elif g > r and g > b and g > 55:
                     green_healthy_count += 1
 
-            chlorosis_pct = round((yellow_count / sample_count) * 100, 1)
-            necrotic_pct = round((brown_necrotic_count / sample_count) * 100, 1)
-            dark_lesion_pct = round((dark_spot_count / sample_count) * 100, 1)
-            healthy_pct = round((green_healthy_count / sample_count) * 100, 1)
+            leaf_pixel_count = (
+                yellow_count
+                + brown_necrotic_count
+                + dark_spot_count
+                + green_healthy_count
+            )
+            if leaf_pixel_count == 0:
+                leaf_pixel_count = sample_count
+
+            chlorosis_pct = round((yellow_count / leaf_pixel_count) * 100, 1)
+            necrotic_pct = round((brown_necrotic_count / leaf_pixel_count) * 100, 1)
+            dark_lesion_pct = round((dark_spot_count / leaf_pixel_count) * 100, 1)
+            healthy_pct = round((green_healthy_count / leaf_pixel_count) * 100, 1)
 
             total_damage_pct = min(
                 100.0, round(chlorosis_pct + necrotic_pct + dark_lesion_pct, 1)
@@ -203,6 +238,20 @@ class LeafVisionAnalyzer:
             detected_crop_final = top_match.get(
                 "crop", effective_crop_hint if effective_crop_hint != "auto" else "Crop"
             )
+
+            # If Ollama vision returned a response, use its diagnosis to override if parsed
+            if ollama_vision_resp:
+                inferred_crop_ollama, inferred_disease_ollama = (
+                    self._parse_vision_response(ollama_vision_resp)
+                )
+                if inferred_crop_ollama:
+                    detected_crop_final = inferred_crop_ollama
+                if inferred_disease_ollama:
+                    for item in self.disease_data:
+                        if item.get("title") == inferred_disease_ollama:
+                            top_match = item
+                            break
+
             confidence = min(
                 96.0, max(72.0, round(70.0 + (total_damage_pct * 0.25), 1))
             )
