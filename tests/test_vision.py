@@ -11,14 +11,15 @@ import pytest
 from PIL import Image
 from core.vision_analyzer import LeafVisionAnalyzer
 
+
 def test_leaf_vision_synthetic_image_analysis():
     analyzer = LeafVisionAnalyzer()
     # Create a synthetic test RGB image (green background with yellow/brown spot)
     img = Image.new("RGB", (100, 100), color=(40, 140, 40))
     for x in range(30, 70):
         for y in range(30, 70):
-            img.putpixel((x, y), (180, 160, 20)) # yellow/chlorotic spot
-            
+            img.putpixel((x, y), (180, 160, 20))  # yellow/chlorotic spot
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     img_bytes = buf.getvalue()
@@ -26,10 +27,15 @@ def test_leaf_vision_synthetic_image_analysis():
     result = analyzer.analyze_image_bytes(img_bytes, crop_hint="Tomato")
     assert result["status"] == "success"
     assert result["crop"] == "Tomato"
-    assert "Early Blight" in result["predicted_disease"] or "Late Blight" in result["predicted_disease"] or "Tomato" in result["predicted_disease"]
+    assert (
+        "Early Blight" in result["predicted_disease"]
+        or "Late Blight" in result["predicted_disease"]
+        or "Tomato" in result["predicted_disease"]
+    )
     assert "Paddy" not in result["crop"]
     assert result["affected_leaf_area_pct"] > 0
     assert "confidence_pct" in result
+
 
 def test_leaf_vision_query_crop_inference():
     analyzer = LeafVisionAnalyzer()
@@ -38,7 +44,9 @@ def test_leaf_vision_query_crop_inference():
     img.save(buf, format="PNG")
     img_bytes = buf.getvalue()
 
-    result = analyzer.analyze_image_bytes(img_bytes, crop_hint="auto", user_query="What is wrong with my tomato leaves?")
+    result = analyzer.analyze_image_bytes(
+        img_bytes, crop_hint="auto", user_query="What is wrong with my tomato leaves?"
+    )
     assert result["status"] == "success"
     assert result["crop"] == "Tomato"
     assert "Paddy" not in result["crop"]

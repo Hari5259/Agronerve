@@ -9,17 +9,22 @@ if str(PROJECT_ROOT) not in sys.path:
 import pytest
 from core.intent_router import IntentRouter
 
+
 def test_disease_intent_routing():
     router = IntentRouter()
     res = router.route("My rice crop has black blast spots on the leaves")
     assert res["domain"] == "disease"
     assert res["is_confident"] is True
 
+
 def test_pesticide_intent_routing():
     router = IntentRouter()
-    res = router.route("What is the recommended dosage of Chlorantraniliprole insecticide per liter?")
+    res = router.route(
+        "What is the recommended dosage of Chlorantraniliprole insecticide per liter?"
+    )
     assert res["domain"] == "pesticide"
     assert res["is_confident"] is True
+
 
 def test_weather_intent_routing():
     router = IntentRouter()
@@ -27,11 +32,15 @@ def test_weather_intent_routing():
     assert res["domain"] == "weather"
     assert res["is_confident"] is True
 
+
 def test_irrigation_intent_routing():
     router = IntentRouter()
-    res = router.route("What is the drip irrigation watering interval for tomato crops?")
+    res = router.route(
+        "What is the drip irrigation watering interval for tomato crops?"
+    )
     assert res["domain"] == "irrigation"
     assert res["is_confident"] is True
+
 
 def test_general_fallback():
     router = IntentRouter()

@@ -12,16 +12,17 @@ from PIL import Image
 from core.orchestrator import AgentOrchestrator
 from core.session_manager import session_manager
 
+
 def test_multimodal_turn_and_follow_up_chat():
     orchestrator = AgentOrchestrator()
     session_id = "test_user_session_42"
-    
+
     # 1. Simulate user sending a tomato leaf image with early blight symptoms
     img = Image.new("RGB", (80, 80), color=(50, 140, 50))
     for x in range(25, 55):
         for y in range(25, 55):
-            img.putpixel((x, y), (180, 160, 20)) # yellow/brown patch
-            
+            img.putpixel((x, y), (180, 160, 20))  # yellow/brown patch
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     img_bytes = buf.getvalue()
@@ -30,11 +31,11 @@ def test_multimodal_turn_and_follow_up_chat():
     turn1_res = orchestrator.process_multimodal_turn(
         image_bytes=img_bytes,
         user_text="What is this disease on my tomato crop?",
-        session_id=session_id
+        session_id=session_id,
     )
     assert turn1_res["domain"] == "disease"
     assert "response" in turn1_res
-    
+
     # Check session memory state
     session = session_manager.get_or_create_session(session_id)
     assert session.current_crop is not None
@@ -42,8 +43,7 @@ def test_multimodal_turn_and_follow_up_chat():
 
     # Step 2: Follow-up question without repeating the crop name
     turn2_res = orchestrator.process_query(
-        query="What is the exact chemical spray dosage for this?",
-        session_id=session_id
+        query="What is the exact chemical spray dosage for this?", session_id=session_id
     )
     assert turn2_res["domain"] == "pesticide"
     assert len(session.messages) == 4
@@ -51,8 +51,7 @@ def test_multimodal_turn_and_follow_up_chat():
 
     # Step 3: Second follow-up regarding weather forecast
     turn3_res = orchestrator.process_query(
-        query="Should I spray if it rains tomorrow?",
-        session_id=session_id
+        query="Should I spray if it rains tomorrow?", session_id=session_id
     )
     assert turn3_res["domain"] == "weather"
     assert "weather" in turn3_res["active_domains"]
