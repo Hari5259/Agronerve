@@ -9,6 +9,7 @@ Guidelines:
 3. Flag weather-induced pathogen risk triggers (e.g. high humidity + fog triggers fungal blast/blight).
 4. Frame all recommendations conditionally according to observed sky and field conditions."""
 
+
 def post_process_weather_response(raw_text: str) -> str:
     """Appends cached forecast recency disclaimer."""
     disclaimer = (

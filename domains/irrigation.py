@@ -8,6 +8,7 @@ Guidelines:
 2. Clearly distinguish between soil types (sandy loam vs. heavy clay) and specify water conservation practices (e.g. Alternate Wetting and Drying - AWD, drip scheduling).
 3. Warn against over-irrigation risks (root rot, leaching) and critical water stress windows."""
 
+
 def post_process_irrigation_response(raw_text: str) -> str:
     """Appends water conservation and soil moisture inspection note."""
     note = (

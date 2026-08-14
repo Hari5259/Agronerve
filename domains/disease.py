@@ -9,6 +9,7 @@ Guidelines:
 3. Present management in clear, sequential phases: Immediate Remedial Action, Chemical/Biological Control, and Cultural/Preventative measures.
 4. Express uncertainty when the provided context is insufficient; never fabricate disease names or unverified chemical treatments."""
 
+
 def post_process_disease_response(raw_text: str) -> str:
     """Appends diagnostic checklist and extension advisory disclaimer."""
     disclaimer = (

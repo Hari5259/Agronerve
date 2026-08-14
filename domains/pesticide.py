@@ -10,6 +10,7 @@ Mandatory Rules:
 4. Mandate Personal Protective Equipment (PPE) precautions in every recommendation.
 5. NEVER recommend restricted, unregistered, or banned chemicals."""
 
+
 def post_process_pesticide_response(raw_text: str) -> str:
     """Appends mandatory safety warning and spray stewardship rules."""
     safety_block = (
