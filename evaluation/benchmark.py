@@ -15,6 +15,7 @@ from core.orchestrator import AgentOrchestrator
 
 EVAL_DIR = Path(__file__).resolve().parent
 
+
 class AgroNerveBenchmark:
     """Automated benchmark runner calculating routing accuracy, confusion matrices, and retrieval metrics."""
 
@@ -36,8 +37,10 @@ class AgroNerveBenchmark:
             return {"error": "No test queries found."}
 
         domains = ["disease", "pesticide", "weather", "irrigation"]
-        confusion_matrix = {actual: {pred: 0 for pred in domains + ["general"]} for actual in domains}
-        
+        confusion_matrix = {
+            actual: {pred: 0 for pred in domains + ["general"]} for actual in domains
+        }
+
         stage1_count = 0
         correct_count = 0
         total_queries = len(queries)
@@ -54,7 +57,7 @@ class AgroNerveBenchmark:
             # Route
             route_res = self.router.route(query_text)
             predicted = route_res["domain"]
-            
+
             if route_res.get("stage_used") == 1 and route_res.get("is_confident"):
                 stage1_count += 1
 
@@ -71,7 +74,9 @@ class AgroNerveBenchmark:
             if chunks:
                 retrieval_hits += 1
 
-        overall_accuracy = (correct_count / total_queries) * 100 if total_queries else 0.0
+        overall_accuracy = (
+            (correct_count / total_queries) * 100 if total_queries else 0.0
+        )
         stage1_rate = (stage1_count / total_queries) * 100 if total_queries else 0.0
 
         return {
@@ -79,11 +84,15 @@ class AgroNerveBenchmark:
             "overall_accuracy_pct": round(overall_accuracy, 2),
             "keyword_stage1_rate_pct": round(stage1_rate, 2),
             "domain_accuracies": {
-                d: round((domain_correct[d] / domain_total[d]) * 100, 2) if domain_total[d] else 0.0
+                d: (
+                    round((domain_correct[d] / domain_total[d]) * 100, 2)
+                    if domain_total[d]
+                    else 0.0
+                )
                 for d in domains
             },
             "confusion_matrix": confusion_matrix,
-            "retrieval_recall_top5": round((retrieval_hits / total_queries), 2)
+            "retrieval_recall_top5": round((retrieval_hits / total_queries), 2),
         }
 
     def print_summary(self):
@@ -93,7 +102,9 @@ class AgroNerveBenchmark:
         print("=" * 60)
         print(f"Total Test Queries Evaluated: {results['total_queries']}")
         print(f"Overall Intent Routing Accuracy: {results['overall_accuracy_pct']}%")
-        print(f"Stage-1 (Keyword Fast-Path) Rate: {results['keyword_stage1_rate_pct']}%")
+        print(
+            f"Stage-1 (Keyword Fast-Path) Rate: {results['keyword_stage1_rate_pct']}%"
+        )
         print(f"Retrieval Recall@5: {results['retrieval_recall_top5'] * 100}%")
         print("-" * 60)
         print("Domain-Specific Accuracies:")
@@ -101,13 +112,27 @@ class AgroNerveBenchmark:
             print(f"  * {d.capitalize():12}: {acc}%")
         print("-" * 60)
         print("Confusion Matrix (Actual Rows -> Predicted Columns):")
-        header = f"{'Actual':12} | " + " | ".join([f"{col[:4]:4}" for col in ["dise", "pest", "weat", "irri", "gene"]])
+        header = f"{'Actual':12} | " + " | ".join(
+            [f"{col[:4]:4}" for col in ["dise", "pest", "weat", "irri", "gene"]]
+        )
         print(header)
         print("-" * len(header))
         for actual, row in results["confusion_matrix"].items():
-            row_str = " | ".join([f"{row.get(col, 0):4}" for col in ["disease", "pesticide", "weather", "irrigation", "general"]])
+            row_str = " | ".join(
+                [
+                    f"{row.get(col, 0):4}"
+                    for col in [
+                        "disease",
+                        "pesticide",
+                        "weather",
+                        "irrigation",
+                        "general",
+                    ]
+                ]
+            )
             print(f"{actual.capitalize():12} | {row_str}")
         print("=" * 60)
+
 
 if __name__ == "__main__":
     runner = AgroNerveBenchmark()
