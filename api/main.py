@@ -20,7 +20,7 @@ app = FastAPI(
     description="Offline Agricultural Advisory System API with Multimodal Vision, Dynamic Agent Orchestration & Session Continuity",
     version="1.1.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # Enable CORS
@@ -37,11 +37,20 @@ router = IntentRouter()
 multi_router = MultiDomainRouter()
 benchmark_runner = AgroNerveBenchmark()
 
+
 # Schemas
 class QueryRequest(BaseModel):
-    query: str = Field(..., json_schema_extra={"example": "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"})
-    session_id: Optional[str] = Field("default", json_schema_extra={"example": "session_123"})
+    query: str = Field(
+        ...,
+        json_schema_extra={
+            "example": "What is the recommended dosage of Chlorantraniliprole 18.5 SC for stem borer in paddy?"
+        },
+    )
+    session_id: Optional[str] = Field(
+        "default", json_schema_extra={"example": "session_123"}
+    )
     language: Optional[str] = Field("en", json_schema_extra={"example": "en"})
+
 
 class QueryResponse(BaseModel):
     session_id: Optional[str] = "default"
@@ -57,18 +66,24 @@ class QueryResponse(BaseModel):
     route_meta: Dict[str, Any]
     context_preview: str
 
+
 class RouteRequest(BaseModel):
     query: str
+
 
 class SpeechCleanRequest(BaseModel):
     text: str
     language: Optional[str] = "en"
 
+
 class SensorTelemetryUpdate(BaseModel):
-    soil_moisture: float = Field(..., ge=0.0, le=100.0, json_schema_extra={"example": 35.5})
+    soil_moisture: float = Field(
+        ..., ge=0.0, le=100.0, json_schema_extra={"example": 35.5}
+    )
     ambient_temp: float = Field(..., json_schema_extra={"example": 28.5})
     humidity: float = Field(..., ge=0.0, le=100.0, json_schema_extra={"example": 65.0})
     rain: bool = Field(..., json_schema_extra={"example": False})
+
 
 @app.get("/", tags=["Health"])
 def health_check():
@@ -83,8 +98,9 @@ def health_check():
         "session_memory_enabled": True,
         "knowledge_base_chunks": total_chunks,
         "supported_domains": list(DOMAIN_CONFIGS.keys()),
-        "supported_languages": SUPPORTED_LANGUAGES
+        "supported_languages": SUPPORTED_LANGUAGES,
     }
+
 
 @app.post("/api/query", response_model=QueryResponse, tags=["Advisory"])
 def process_agricultural_query(req: QueryRequest):
@@ -92,18 +108,17 @@ def process_agricultural_query(req: QueryRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
     result = orchestrator.process_query(
-        req.query, 
-        session_id=req.session_id or "default", 
-        language=req.language or "en"
+        req.query, session_id=req.session_id or "default", language=req.language or "en"
     )
     return result
+
 
 @app.post("/api/chat/multimodal", tags=["Multimodal Chat"])
 async def process_multimodal_chat(
     file: UploadFile = File(...),
     query: Optional[str] = Form(None),
     session_id: Optional[str] = Form("default"),
-    language: Optional[str] = Form("en")
+    language: Optional[str] = Form("en"),
 ):
     """Accepts an uploaded leaf photograph along with an optional user query, performs AI diagnosis, and initiates/continues chat context."""
     image_bytes = await file.read()
@@ -113,9 +128,10 @@ async def process_multimodal_chat(
         image_bytes=image_bytes,
         user_text=query,
         session_id=session_id or "default",
-        language=language or "en"
+        language=language or "en",
     )
     return result
+
 
 @app.get("/api/chat/history/{session_id}", tags=["Multimodal Chat"])
 def get_chat_history(session_id: str):
@@ -125,8 +141,9 @@ def get_chat_history(session_id: str):
         "session_id": session_id,
         "current_crop": session.current_crop,
         "current_diagnosed_disease": session.current_diagnosed_disease,
-        "messages": session.messages
+        "messages": session.messages,
     }
+
 
 @app.delete("/api/chat/session/{session_id}", tags=["Multimodal Chat"])
 def reset_chat_session(session_id: str):
@@ -134,11 +151,13 @@ def reset_chat_session(session_id: str):
     session_manager.clear_session(session_id)
     return {"status": "success", "message": f"Session '{session_id}' cleared."}
 
+
 @app.post("/api/route", tags=["Routing"])
 def classify_intent_only(req: RouteRequest):
     """Performs multi-domain intent analysis."""
     multi_result = multi_router.analyze_multi_domain(req.query)
     return multi_result
+
 
 @app.post("/api/scan-leaf", tags=["Computer Vision"])
 async def scan_leaf_image(file: UploadFile = File(...), crop_hint: str = "auto"):
@@ -149,10 +168,12 @@ async def scan_leaf_image(file: UploadFile = File(...), crop_hint: str = "auto")
     result = leaf_vision_scanner.analyze_image_bytes(image_bytes, crop_hint=crop_hint)
     return result
 
+
 @app.get("/api/sensor/telemetry", tags=["IoT Sensors"])
 def get_sensor_telemetry():
     """Returns real-time soil moisture and environmental weather sensor metrics."""
     return sensor_manager.get_telemetry()
+
 
 @app.post("/api/sensor/telemetry", tags=["IoT Sensors"])
 def update_sensor_telemetry(data: SensorTelemetryUpdate):
@@ -161,13 +182,14 @@ def update_sensor_telemetry(data: SensorTelemetryUpdate):
         soil_moisture=data.soil_moisture,
         ambient_temp=data.ambient_temp,
         humidity=data.humidity,
-        rain=data.rain
+        rain=data.rain,
     )
     return {
         "status": "success",
         "message": "Telemetry state updated successfully.",
-        "telemetry": sensor_manager.get_telemetry()
+        "telemetry": sensor_manager.get_telemetry(),
     }
+
 
 @app.post("/api/voice/clean", tags=["Voice Engine"])
 def clean_text_for_speech(req: SpeechCleanRequest):
@@ -175,10 +197,12 @@ def clean_text_for_speech(req: SpeechCleanRequest):
     clean = voice_engine.clean_text_for_speech(req.text)
     return {"cleaned_speech_text": clean, "language": req.language}
 
+
 @app.get("/api/languages", tags=["Localization"])
 def get_languages():
     """Returns available Indian regional languages."""
     return {"languages": SUPPORTED_LANGUAGES}
+
 
 @app.get("/api/domains", tags=["Domain Configuration"])
 def get_domain_modules():
@@ -194,20 +218,25 @@ def get_domain_modules():
                 "id": k,
                 "name": v["name"],
                 "knowledge_chunks": counts.get(k, 0),
-                "system_prompt": v["system_prompt"]
+                "system_prompt": v["system_prompt"],
             }
-            for k, v in DOMAIN_CONFIGS.items() if k != "general"
+            for k, v in DOMAIN_CONFIGS.items()
+            if k != "general"
         ]
     }
 
+
 @app.get("/api/knowledge", tags=["Knowledge Base"])
-def browse_knowledge_base(domain: Optional[str] = Query(None, description="Filter by domain")):
+def browse_knowledge_base(
+    domain: Optional[str] = Query(None, description="Filter by domain")
+):
     """Browse stored agricultural knowledge base chunks."""
     all_chunks = KnowledgeChunker.get_all_chunks()
     if domain and domain != "all":
         filtered = [c for c in all_chunks if c.get("domain") == domain.lower()]
         return {"total": len(filtered), "chunks": filtered}
     return {"total": len(all_chunks), "chunks": all_chunks}
+
 
 @app.get("/api/benchmark", tags=["Evaluation"])
 def run_evaluation_benchmark():
