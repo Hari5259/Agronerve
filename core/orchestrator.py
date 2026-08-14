@@ -186,7 +186,17 @@ class AgentOrchestrator:
         history_str = session.get_conversation_history_prompt()
 
         lang_instruction = language_manager.get_language_prompt_instruction(language)
-        effective_system_prompt = DISEASE_PROMPT + lang_instruction
+        if retrieved_chunks:
+            effective_system_prompt = DISEASE_PROMPT + lang_instruction
+        else:
+            # Fallback when database is empty / not working - tell Ollama to fetch correct info from its training
+            fallback_prompt = (
+                "You are the AgroNerve Crop Disease Specialist Agent, acting as an experienced plant pathologist and agronomist.\n"
+                "Your goal is to accurately diagnose crop diseases, identify causal organisms, and provide verified management protocols.\n"
+                "Since no local database chunks are available, please use your own internal agricultural knowledge to provide the correct "
+                "diagnosis and treatment recommendations for this crop."
+            )
+            effective_system_prompt = fallback_prompt + lang_instruction
 
         llm_engine_used = "ollama"
         try:
@@ -306,7 +316,17 @@ class AgentOrchestrator:
             system_prompt = domain_cfg["system_prompt"]
 
         lang_instruction = language_manager.get_language_prompt_instruction(language)
-        effective_system_prompt = system_prompt + lang_instruction
+        if all_chunks:
+            effective_system_prompt = system_prompt + lang_instruction
+        else:
+            # Fallback when database is empty / not working
+            fallback_prompt = (
+                f"You are the AgroNerve {agent_name}.\n"
+                f"Your goal is to assist the farmer with their query regarding {primary_domain}.\n"
+                "Since the local database is currently unavailable, use your own internal agricultural knowledge to provide the most "
+                "accurate and helpful recommendations."
+            )
+            effective_system_prompt = fallback_prompt + lang_instruction
 
         # 4. Response Generation
         llm_engine_used = "ollama"
