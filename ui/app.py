@@ -165,12 +165,12 @@ st.markdown(f"""
 
 # Navigation Tabs
 tab_chat, tab_scan, tab_sensor, tab_kb, tab_calc, tab_bench = st.tabs([
-    "💬 " + language_manager.get_text('chat_tab', current_lang),
-    "📸 " + language_manager.get_text('scan_tab', current_lang),
-    "📡 " + language_manager.get_text('sensor_tab', current_lang),
-    "📚 " + language_manager.get_text('kb_tab', current_lang),
-    "🧮 " + language_manager.get_text('calc_tab', current_lang),
-    "📊 " + language_manager.get_text('bench_tab', current_lang)
+    language_manager.get_text('chat_tab', current_lang),
+    language_manager.get_text('scan_tab', current_lang),
+    language_manager.get_text('sensor_tab', current_lang),
+    language_manager.get_text('kb_tab', current_lang),
+    language_manager.get_text('calc_tab', current_lang),
+    language_manager.get_text('bench_tab', current_lang)
 ])
 
 # ----------------- TAB 1: ADVISORY CHAT WITH MULTIMODAL VISION -----------------
@@ -383,7 +383,7 @@ with tab_kb:
 
 # ----------------- TAB 5: AGRO-CALCULATORS -----------------
 with tab_calc:
-    st.subheader("🧮 " + language_manager.get_text('calc_tab', current_lang))
+    st.subheader(language_manager.get_text('calc_tab', current_lang))
     c1, c2 = st.columns(2)
     
     with c1:
