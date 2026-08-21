@@ -58,3 +58,24 @@ def test_fallback_offline_synthesizer_i18n():
 
     # The title suffix is in Tamil
     assert "ஆலோசனைக்கான" in fallback_text or "அக்ரோநெர்வின்" in fallback_text
+
+
+def test_missing_translation_key_fallback():
+    # Key not found should return the key itself
+    val = language_manager.get_text("missing_key_xyz_123", "en")
+    assert val == "missing_key_xyz_123"
+
+
+def test_empty_translations_fallback():
+    # If the translations dictionary is empty/unloaded, should return the key itself
+    with patch.object(language_manager, "translations", {}):
+        val = language_manager.get_text("any_label", "ta")
+        assert val == "any_label"
+
+
+def test_conversational_instruction_guidelines():
+    instruction = language_manager.get_language_prompt_instruction("hi")
+    assert "simple, plain, and conversational" in instruction
+    assert "Avoid complex English technical jargon" in instruction
+    assert "Hindi" in instruction
+
