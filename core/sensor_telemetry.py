@@ -78,11 +78,11 @@ class SensorTelemetryManager:
     def set_manual_telemetry(
         self, soil_moisture: float, ambient_temp: float, humidity: float, rain: bool
     ):
-        """Allows manual calibration or testing with custom sensor readings."""
-        self._soil_moisture_vwc = soil_moisture
-        self._ambient_temp_c = ambient_temp
-        self._ambient_humidity_rh = humidity
-        self._rain_detected = rain
+        """Allows manual calibration or testing with custom sensor readings with physical clamping."""
+        self._soil_moisture_vwc = max(0.0, min(100.0, float(soil_moisture)))
+        self._ambient_temp_c = max(-50.0, min(60.0, float(ambient_temp)))
+        self._ambient_humidity_rh = max(0.0, min(100.0, float(humidity)))
+        self._rain_detected = bool(rain)
 
 
 sensor_manager = SensorTelemetryManager()
