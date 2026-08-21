@@ -1,6 +1,9 @@
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Any
+
+logger = logging.getLogger(__name__)
 
 TRANSLATION_FILE = (
     Path(__file__).resolve().parent.parent / "data" / "translations" / "languages.json"
@@ -28,7 +31,12 @@ class LanguageManager:
                 self.translations = json.load(f)
 
     def get_text(self, key: str, lang: str = "en") -> str:
+        if not self.translations:
+            logger.warning("Translations dictionary is empty. Falling back directly to key: '%s'", key)
+            return key
         lang_dict = self.translations.get(lang, self.translations.get("en", {}))
+        if key not in lang_dict:
+            logger.warning("Translation key '%s' not found for language '%s'. Falling back to English or key itself.", key, lang)
         return lang_dict.get(key, self.translations.get("en", {}).get(key, key))
 
     def get_language_prompt_instruction(self, lang: str) -> str:
