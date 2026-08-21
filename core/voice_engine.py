@@ -43,19 +43,24 @@ class VoiceEngine:
         }.get(lang, "en-IN")
 
         return f"""
-        <div style="margin: 0.8rem 0;">
+        <div style="margin: 0.8rem 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <button onclick="speakText()" style="background-color: #1b4332; color: #d8f3dc; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">
                 🔊 Read Advisory Aloud
             </button>
-            <button onclick="window.speechSynthesis.cancel()" style="background-color: #7f1d1d; color: #fecaca; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; margin-left: 6px;">
+            <button onclick="window.speechSynthesis.cancel()" style="background-color: #7f1d1d; color: #fecaca; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">
                 ⏹ Stop
             </button>
+            <span style="font-size: 0.85rem; color: #d8f3dc; display: flex; align-items: center; gap: 4px; background-color: #1b4332; padding: 4px 8px; border-radius: 6px;">
+                Speed: 
+                <input type="range" id="speechRate" min="0.5" max="2.0" value="0.95" step="0.05" style="width: 70px; accent-color: #d8f3dc; cursor: pointer; vertical-align: middle;">
+            </span>
             <script>
                 function speakText() {{
                     window.speechSynthesis.cancel();
                     var msg = new SpeechSynthesisUtterance("{escaped}");
                     msg.lang = "{lang_code}";
-                    msg.rate = 0.95;
+                    var speedEl = document.getElementById("speechRate");
+                    msg.rate = speedEl ? parseFloat(speedEl.value) : 0.95;
                     window.speechSynthesis.speak(msg);
                 }}
             </script>
