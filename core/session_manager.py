@@ -74,5 +74,18 @@ class SessionManager:
         if session_id in self.sessions:
             del self.sessions[session_id]
 
+    def cleanup_expired_sessions(self, max_idle_seconds: float = 3600) -> int:
+        """Evicts sessions that have been inactive for longer than max_idle_seconds.
+        Returns: Number of pruned sessions.
+        """
+        now = time.time()
+        expired_ids = [
+            sid for sid, session in self.sessions.items()
+            if now - session.last_active > max_idle_seconds
+        ]
+        for sid in expired_ids:
+            del self.sessions[sid]
+        return len(expired_ids)
+
 
 session_manager = SessionManager()
