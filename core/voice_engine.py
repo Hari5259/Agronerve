@@ -14,6 +14,17 @@ class VoiceEngine:
         # Remove bold, italics, bullets, blockquotes
         text = re.sub(r"[*_`>~]", "", text)
         text = re.sub(r"--+", "", text)
+        
+        # Translate technical units / abbreviations to readable spoken words
+        text = re.sub(r"\bml/L\b", "milliliters per liter", text, flags=re.IGNORECASE)
+        text = re.sub(r"\bg/L\b", "grams per liter", text, flags=re.IGNORECASE)
+        text = re.sub(r"\bVWC\b", "Volumetric Water Content", text, flags=re.IGNORECASE)
+        text = re.sub(r"\bRH\b", "Relative Humidity", text, flags=re.IGNORECASE)
+        text = re.sub(r"°C\b", " degrees Celsius", text)
+        text = re.sub(r"%", " percent", text)
+        text = re.sub(r"\bPPE\b", "P P E", text)
+        text = re.sub(r"\bPHI\b", "P H I", text)
+
         # Clean multiple newlines and extra spaces
         text = re.sub(r"\n+", ". ", text)
         text = re.sub(r"\s+", " ", text).strip()
