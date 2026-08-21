@@ -15,6 +15,9 @@ CROP_KEYWORDS = {
     "Cotton": ["cotton", "kapas", "paruthi"],
     "Wheat": ["wheat", "gehun", "godhumai"],
     "Chilli": ["chilli", "chili", "pepper", "mirchi", "milagai"],
+    "Maize (Corn)": ["maize", "corn", "cholam", "makka", "makai"],
+    "Sugarcane": ["sugarcane", "karumbu", "ganna"],
+    "Groundnut": ["groundnut", "peanut", "verkadalai", "moongfali"],
 }
 
 
