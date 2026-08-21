@@ -138,7 +138,8 @@ class RAGPipeline:
 
             scored_chunks.append((score, chunk))
 
-        # Sort by score descending
+        # Sort by score descending and filter out zero-relevance documents
+        scored_chunks = [item for item in scored_chunks if item[0] > 0.0]
         scored_chunks.sort(key=lambda x: x[0], reverse=True)
         results = [item[1] for item in scored_chunks[:top_k]]
         logger.info(f"Offline retrieval completed. Found {len(results)} chunks.")
