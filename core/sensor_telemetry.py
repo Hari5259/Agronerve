@@ -45,14 +45,24 @@ class SensorTelemetryManager:
         pathogen_risk = "Low"
         if self._ambient_humidity_rh > 85.0 and 20.0 <= self._ambient_temp_c <= 28.0:
             pathogen_risk = "HIGH (Fungal spore germination threshold reached: High RH + Moderate Temp)"
+        elif self._ambient_temp_c < 4.0:
+            pathogen_risk = "FROST WARNING: Extreme cold hazard. Foliage frost injury expected. Overnight sprinkler irrigation recommended."
 
         spray_window_status = "Optimal"
         if self._ambient_temp_c > 35.0:
             spray_window_status = (
                 "Unfavorable (High temperature will cause droplet scorch)"
             )
+        elif self._ambient_temp_c < 10.0:
+            spray_window_status = (
+                "Unfavorable (Low temperature reduces systemic chemical uptake)"
+            )
         elif self._rain_detected:
             spray_window_status = "Prohibited (Rain wash-off risk)"
+        elif self._ambient_humidity_rh > 90.0:
+            spray_window_status = (
+                "Sub-optimal (High humidity delays spray drying, increasing run-off risk)"
+            )
 
         return {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
