@@ -32,15 +32,19 @@ class LanguageManager:
         return lang_dict.get(key, self.translations.get("en", {}).get(key, key))
 
     def get_language_prompt_instruction(self, lang: str) -> str:
-        """Constructs localized instruction for the LLM output."""
+        """Constructs localized instruction for the LLM output with simplified vocabulary rules."""
+        base_instruction = (
+            "\n\nIMPORTANT: Use simple, plain, and conversational phrasing. Avoid complex English technical jargon "
+            "where common localized terminology is widely understood. Use short sentences and clean bullet points."
+        )
         if lang == "ta":
-            return "\n\nIMPORTANT: Please generate the response in clear, formal Tamil (தமிழ்) suitable for Tamil Nadu farmers."
+            return base_instruction + " Output the response in clear, formal Tamil (தமிழ்) suitable for Tamil Nadu farmers."
         elif lang == "hi":
-            return "\n\nIMPORTANT: Please generate the response in clear Hindi (हिन्दी) suitable for Indian farmers."
+            return base_instruction + " Output the response in clear, easy-to-understand Hindi (हिन्दी) suitable for Indian farmers."
         elif lang == "te":
-            return "\n\nIMPORTANT: Please generate the response in clear Telugu (తెలుగు) suitable for Andhra/Telangana farmers."
+            return base_instruction + " Output the response in clear Telugu (తెలుగు) suitable for Andhra Pradesh and Telangana farmers."
         elif lang == "kn":
-            return "\n\nIMPORTANT: Please generate the response in clear Kannada (ಕನ್ನಡ) suitable for Karnataka farmers."
+            return base_instruction + " Output the response in clear Kannada (ಕನ್ನಡ) suitable for Karnataka farmers."
         return ""
 
 
