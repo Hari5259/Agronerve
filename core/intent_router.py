@@ -235,6 +235,21 @@ class IntentRouter:
 
     def route(self, query: str) -> Dict[str, Any]:
         """Runs the full 2-stage routing pipeline with diagnostic metadata."""
+        if not query or not query.strip():
+            logger.info("Empty query received in routing. Falling back to general.")
+            return {
+                "domain": "general",
+                "score": 0.0,
+                "is_confident": True,
+                "stage_used": 1,
+            }
+
+        # Clamp max query length to 1000 characters to prevent high latency/abuse
+        max_len = 1000
+        if len(query) > max_len:
+            logger.info(f"Query length {len(query)} exceeds maximum. Truncating to {max_len} chars.")
+            query = query[:max_len]
+
         domain, score, is_confident = self.route_stage1(query)
         stage_used = 1
 
