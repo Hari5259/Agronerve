@@ -107,6 +107,12 @@ class LeafVisionAnalyzer:
         logger.info(
             f"Analyzing leaf image bytes with crop_hint: '{crop_hint}', user_query: '{user_query}'"
         )
+        if not image_bytes:
+            return {
+                "status": "error",
+                "message": "Empty image bytes provided.",
+            }
+
         # Check if user query contains crop name (e.g. "my tomato has spots")
         inferred_crop = self._extract_crop_from_text(user_query)
         effective_crop_hint = crop_hint
@@ -124,6 +130,16 @@ class LeafVisionAnalyzer:
 
             img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
             width, height = img.size
+            if width < 10 or height < 10:
+                return {
+                    "status": "error",
+                    "message": f"Image dimensions {width}x{height} are too small (minimum 10x10 required).",
+                }
+            if width > 8000 or height > 8000:
+                return {
+                    "status": "error",
+                    "message": f"Image dimensions {width}x{height} exceed maximum limits (8000x8000).",
+                }
             total_pixels = width * height
 
             # Fast offline pixel color distribution analysis
