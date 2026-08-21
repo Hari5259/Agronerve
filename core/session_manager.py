@@ -17,7 +17,7 @@ class ChatSession:
         self.active_domains: List[str] = ["general"]
 
     def add_message(
-        self, role: str, content: str, meta: Optional[Dict[str, Any]] = None
+        self, role: str, content: str, meta: Optional[Dict[str, Any]] = None, max_messages: int = 50
     ):
         self.messages.append(
             {
@@ -28,6 +28,9 @@ class ChatSession:
             }
         )
         self.last_active = time.time()
+        # Keep only the last max_messages to prevent memory leak
+        if len(self.messages) > max_messages:
+            self.messages = self.messages[-max_messages:]
 
     def update_visual_context(self, vision_result: Dict[str, Any]):
         self.last_visual_diagnosis = vision_result
