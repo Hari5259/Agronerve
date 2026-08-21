@@ -15,22 +15,24 @@ class SensorTelemetryManager:
         self._ambient_humidity_rh = 68.0  # Relative humidity %
         self._solar_radiation_wm2 = 520  # Solar radiation W/m²
         self._rain_detected = False
+        self._is_manual = False
 
     def get_telemetry(self) -> Dict[str, Any]:
         """Returns current live sensor readings with agronomic risk triggers."""
-        # Add slight natural jitter for live telemetry simulation
-        self._soil_moisture_vwc = max(
-            10.0,
-            min(85.0, round(self._soil_moisture_vwc + random.uniform(-0.4, 0.4), 1)),
-        )
-        self._soil_temp_c = round(self._soil_temp_c + random.uniform(-0.1, 0.1), 1)
-        self._ambient_temp_c = round(
-            self._ambient_temp_c + random.uniform(-0.2, 0.2), 1
-        )
-        self._ambient_humidity_rh = max(
-            20.0,
-            min(98.0, round(self._ambient_humidity_rh + random.uniform(-0.5, 0.5), 1)),
-        )
+        # Add slight natural jitter for live telemetry simulation only if not manually calibrated
+        if not self._is_manual:
+            self._soil_moisture_vwc = max(
+                10.0,
+                min(85.0, round(self._soil_moisture_vwc + random.uniform(-0.4, 0.4), 1)),
+            )
+            self._soil_temp_c = round(self._soil_temp_c + random.uniform(-0.1, 0.1), 1)
+            self._ambient_temp_c = round(
+                self._ambient_temp_c + random.uniform(-0.2, 0.2), 1
+            )
+            self._ambient_humidity_rh = max(
+                20.0,
+                min(98.0, round(self._ambient_humidity_rh + random.uniform(-0.5, 0.5), 1)),
+            )
 
         # Agronomic Threshold Evaluations
         irrigation_alert = "Normal Soil Hydration"
@@ -93,6 +95,7 @@ class SensorTelemetryManager:
         self._ambient_temp_c = max(-50.0, min(60.0, float(ambient_temp)))
         self._ambient_humidity_rh = max(0.0, min(100.0, float(humidity)))
         self._rain_detected = bool(rain)
+        self._is_manual = True
 
 
 sensor_manager = SensorTelemetryManager()
