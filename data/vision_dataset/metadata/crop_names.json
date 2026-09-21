@@ -1,0 +1,24 @@
+{
+  "crops": [
+    "chilli",
+    "paddy",
+    "potato",
+    "tomato",
+    "wheat"
+  ],
+  "crop_to_idx": {
+    "chilli": 0,
+    "paddy": 1,
+    "potato": 2,
+    "tomato": 3,
+    "wheat": 4
+  },
+  "idx_to_crop": {
+    "0": "chilli",
+    "1": "paddy",
+    "2": "potato",
+    "3": "tomato",
+    "4": "wheat"
+  },
+  "total_crops": 5
+}

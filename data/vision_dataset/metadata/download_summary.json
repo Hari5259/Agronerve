@@ -1,0 +1,27 @@
+{
+  "status": "success",
+  "total_images_collected": 0,
+  "target_classes_count": 18,
+  "classes_with_images_count": 0,
+  "counts_per_class": {},
+  "supported_classes": [
+    "paddy_blast",
+    "paddy_bacterial_leaf_blight",
+    "paddy_sheath_blight",
+    "cotton_bacterial_blight",
+    "cotton_leaf_curl_virus",
+    "tomato_early_blight",
+    "tomato_late_blight",
+    "tomato_leaf_curl_virus",
+    "wheat_yellow_rust",
+    "chilli_anthracnose",
+    "potato_early_blight",
+    "potato_late_blight",
+    "chilli_healthy",
+    "cotton_healthy",
+    "paddy_healthy",
+    "potato_healthy",
+    "tomato_healthy",
+    "wheat_healthy"
+  ]
+}

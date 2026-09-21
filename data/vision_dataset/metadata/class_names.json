@@ -1,0 +1,51 @@
+{
+  "classes": [
+    "chilli_anthracnose",
+    "chilli_healthy",
+    "paddy_blast",
+    "paddy_healthy",
+    "paddy_sheath_blight",
+    "potato_early_blight",
+    "potato_healthy",
+    "potato_late_blight",
+    "tomato_early_blight",
+    "tomato_healthy",
+    "tomato_late_blight",
+    "tomato_leaf_curl_virus",
+    "wheat_healthy",
+    "wheat_yellow_rust"
+  ],
+  "class_to_idx": {
+    "chilli_anthracnose": 0,
+    "chilli_healthy": 1,
+    "paddy_blast": 2,
+    "paddy_healthy": 3,
+    "paddy_sheath_blight": 4,
+    "potato_early_blight": 5,
+    "potato_healthy": 6,
+    "potato_late_blight": 7,
+    "tomato_early_blight": 8,
+    "tomato_healthy": 9,
+    "tomato_late_blight": 10,
+    "tomato_leaf_curl_virus": 11,
+    "wheat_healthy": 12,
+    "wheat_yellow_rust": 13
+  },
+  "idx_to_class": {
+    "0": "chilli_anthracnose",
+    "1": "chilli_healthy",
+    "2": "paddy_blast",
+    "3": "paddy_healthy",
+    "4": "paddy_sheath_blight",
+    "5": "potato_early_blight",
+    "6": "potato_healthy",
+    "7": "potato_late_blight",
+    "8": "tomato_early_blight",
+    "9": "tomato_healthy",
+    "10": "tomato_late_blight",
+    "11": "tomato_leaf_curl_virus",
+    "12": "wheat_healthy",
+    "13": "wheat_yellow_rust"
+  },
+  "total_classes": 14
+}

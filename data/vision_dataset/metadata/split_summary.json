@@ -1,0 +1,97 @@
+{
+  "status": "success",
+  "total_images": 156,
+  "classes_count": 14,
+  "crops_count": 5,
+  "split_breakdown": {
+    "train": 107,
+    "validation": 25,
+    "test": 24
+  },
+  "per_class_counts": {
+    "chilli_anthracnose": {
+      "train": 6,
+      "validation": 1,
+      "test": 1,
+      "total": 8
+    },
+    "chilli_healthy": {
+      "train": 5,
+      "validation": 1,
+      "test": 1,
+      "total": 7
+    },
+    "paddy_blast": {
+      "train": 2,
+      "validation": 1,
+      "test": 1,
+      "total": 4
+    },
+    "paddy_healthy": {
+      "train": 12,
+      "validation": 3,
+      "test": 2,
+      "total": 17
+    },
+    "paddy_sheath_blight": {
+      "train": 1,
+      "validation": 0,
+      "test": 1,
+      "total": 2
+    },
+    "potato_early_blight": {
+      "train": 8,
+      "validation": 2,
+      "test": 2,
+      "total": 12
+    },
+    "potato_healthy": {
+      "train": 19,
+      "validation": 4,
+      "test": 4,
+      "total": 27
+    },
+    "potato_late_blight": {
+      "train": 6,
+      "validation": 1,
+      "test": 2,
+      "total": 9
+    },
+    "tomato_early_blight": {
+      "train": 2,
+      "validation": 1,
+      "test": 1,
+      "total": 4
+    },
+    "tomato_healthy": {
+      "train": 8,
+      "validation": 2,
+      "test": 1,
+      "total": 11
+    },
+    "tomato_late_blight": {
+      "train": 1,
+      "validation": 1,
+      "test": 1,
+      "total": 3
+    },
+    "tomato_leaf_curl_virus": {
+      "train": 12,
+      "validation": 3,
+      "test": 2,
+      "total": 17
+    },
+    "wheat_healthy": {
+      "train": 24,
+      "validation": 5,
+      "test": 5,
+      "total": 34
+    },
+    "wheat_yellow_rust": {
+      "train": 1,
+      "validation": 0,
+      "test": 0,
+      "total": 1
+    }
+  }
+}
