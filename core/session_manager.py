@@ -35,7 +35,11 @@ class ChatSession:
     def update_visual_context(self, vision_result: Dict[str, Any]):
         self.last_visual_diagnosis = vision_result
         if "crop" in vision_result:
-            self.current_crop = vision_result["crop"]
+            crop_val = vision_result["crop"]
+            if isinstance(crop_val, dict):
+                self.current_crop = crop_val.get("name", "Crop")
+            elif isinstance(crop_val, str):
+                self.current_crop = crop_val
         if "predicted_disease" in vision_result:
             self.current_diagnosed_disease = vision_result["predicted_disease"]
 
