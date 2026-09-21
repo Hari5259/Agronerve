@@ -1,0 +1,446 @@
+{
+  "evaluation_timestamp": "2026-09-21 09:53:59",
+  "crop_model": {
+    "status": "success",
+    "model_type": "crop_classifier",
+    "total_test_samples": 24,
+    "accuracy_pct": 54.17,
+    "macro_precision": 0.4869,
+    "macro_recall": 0.44,
+    "macro_f1": 0.3992,
+    "weighted_f1": 0.4781,
+    "per_class_report": {
+      "chilli": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 2.0
+      },
+      "paddy": {
+        "precision": 1.0,
+        "recall": 0.25,
+        "f1-score": 0.4,
+        "support": 4.0
+      },
+      "potato": {
+        "precision": 0.5454545454545454,
+        "recall": 0.75,
+        "f1-score": 0.631578947368421,
+        "support": 8.0
+      },
+      "tomato": {
+        "precision": 0.3333333333333333,
+        "recall": 0.2,
+        "f1-score": 0.25,
+        "support": 5.0
+      },
+      "wheat": {
+        "precision": 0.5555555555555556,
+        "recall": 1.0,
+        "f1-score": 0.7142857142857143,
+        "support": 5.0
+      },
+      "accuracy": 0.5416666666666666,
+      "macro avg": {
+        "precision": 0.48686868686868684,
+        "recall": 0.44000000000000006,
+        "f1-score": 0.3991729323308271,
+        "support": 24.0
+      },
+      "weighted avg": {
+        "precision": 0.5336700336700336,
+        "recall": 0.5416666666666666,
+        "f1-score": 0.4780858395989975,
+        "support": 24.0
+      }
+    },
+    "classification_report_text": "              precision    recall  f1-score   support\n\n      chilli       0.00      0.00      0.00         2\n       paddy       1.00      0.25      0.40         4\n      potato       0.55      0.75      0.63         8\n      tomato       0.33      0.20      0.25         5\n       wheat       0.56      1.00      0.71         5\n\n    accuracy                           0.54        24\n   macro avg       0.49      0.44      0.40        24\nweighted avg       0.53      0.54      0.48        24\n",
+    "confusion_matrix": [
+      [
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        0,
+        6,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        4,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        5
+      ]
+    ],
+    "underperforming_classes": [
+      "chilli",
+      "paddy",
+      "potato",
+      "tomato"
+    ]
+  },
+  "disease_model": {
+    "status": "success",
+    "model_type": "unified_disease_classifier",
+    "total_test_samples": 24,
+    "accuracy_pct": 29.17,
+    "macro_precision": 0.0684,
+    "macro_recall": 0.1154,
+    "macro_f1": 0.0857,
+    "weighted_f1": 0.2155,
+    "per_class_report": {
+      "chilli_anthracnose": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "chilli_healthy": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "paddy_blast": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "paddy_healthy": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 2.0
+      },
+      "paddy_sheath_blight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "potato_early_blight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 2.0
+      },
+      "potato_healthy": {
+        "precision": 0.3333333333333333,
+        "recall": 0.5,
+        "f1-score": 0.4,
+        "support": 4.0
+      },
+      "potato_late_blight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 2.0
+      },
+      "tomato_early_blight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "tomato_healthy": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "tomato_late_blight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "tomato_leaf_curl_virus": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 2.0
+      },
+      "wheat_healthy": {
+        "precision": 0.5555555555555556,
+        "recall": 1.0,
+        "f1-score": 0.7142857142857143,
+        "support": 5.0
+      },
+      "accuracy": 0.2916666666666667,
+      "macro avg": {
+        "precision": 0.06837606837606837,
+        "recall": 0.11538461538461539,
+        "f1-score": 0.08571428571428572,
+        "support": 24.0
+      },
+      "weighted avg": {
+        "precision": 0.17129629629629628,
+        "recall": 0.2916666666666667,
+        "f1-score": 0.2154761904761905,
+        "support": 24.0
+      }
+    },
+    "classification_report_text": "                        precision    recall  f1-score   support\n\n    chilli_anthracnose       0.00      0.00      0.00         1\n        chilli_healthy       0.00      0.00      0.00         1\n           paddy_blast       0.00      0.00      0.00         1\n         paddy_healthy       0.00      0.00      0.00         2\n   paddy_sheath_blight       0.00      0.00      0.00         1\n   potato_early_blight       0.00      0.00      0.00         2\n        potato_healthy       0.33      0.50      0.40         4\n    potato_late_blight       0.00      0.00      0.00         2\n   tomato_early_blight       0.00      0.00      0.00         1\n        tomato_healthy       0.00      0.00      0.00         1\n    tomato_late_blight       0.00      0.00      0.00         1\ntomato_leaf_curl_virus       0.00      0.00      0.00         2\n         wheat_healthy       0.56      1.00      0.71         5\n\n              accuracy                           0.29        24\n             macro avg       0.07      0.12      0.09        24\n          weighted avg       0.17      0.29      0.22        24\n",
+    "confusion_matrix": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "underperforming_classes": [
+      "chilli_anthracnose",
+      "chilli_healthy",
+      "paddy_blast",
+      "paddy_healthy",
+      "paddy_sheath_blight",
+      "potato_early_blight",
+      "potato_healthy",
+      "potato_late_blight",
+      "tomato_early_blight",
+      "tomato_healthy",
+      "tomato_late_blight",
+      "tomato_leaf_curl_virus"
+    ]
+  }
+}
