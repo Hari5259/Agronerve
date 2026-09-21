@@ -212,17 +212,30 @@ with tab_chat:
     with st.expander(
         "📷 **Attach / Capture Crop Leaf Photo for AI Diagnosis**", expanded=False
     ):
+        chat_input_type = st.radio(
+            "Image Source:",
+            ["📁 Upload File", "📸 Live Camera"],
+            horizontal=True,
+            key="chat_img_source",
+        )
         col_u1, col_u2 = st.columns([3, 2])
+        uploaded_chat_photo = None
         with col_u1:
-            uploaded_chat_photo = st.file_uploader(
-                "Upload a leaf image (Tomato, Paddy, Cotton, Wheat, Chilli):",
-                type=["jpg", "jpeg", "png"],
-                key="chat_uploader",
-            )
+            if chat_input_type == "📁 Upload File":
+                uploaded_chat_photo = st.file_uploader(
+                    "Upload a leaf image (Tomato, Paddy, Cotton, Wheat, Chilli, Potato):",
+                    type=["jpg", "jpeg", "png"],
+                    key="chat_uploader",
+                )
+            else:
+                uploaded_chat_photo = st.camera_input(
+                    "Capture live leaf photo:",
+                    key="chat_camera_input",
+                )
         with col_u2:
             chat_crop_hint = st.selectbox(
                 "Crop Type:",
-                ["Auto-detect", "Tomato", "Paddy (Rice)", "Cotton", "Wheat", "Chilli"],
+                ["Auto-detect", "Tomato", "Paddy (Rice)", "Cotton", "Wheat", "Chilli", "Potato"],
                 key="chat_crop_select",
             )
 
@@ -235,7 +248,7 @@ with tab_chat:
         ):
             photo_bytes = uploaded_chat_photo.read()
             with st.spinner(
-                "Analyzing foliar visual patterns & retrieving ICAR management protocols..."
+                "Running computer vision models & retrieving ICAR management protocols..."
             ):
                 mm_res = st.session_state.orchestrator.process_multimodal_turn(
                     image_bytes=photo_bytes,
@@ -374,44 +387,76 @@ with tab_chat:
                     }
                 )
 
-# ----------------- TAB 2: VISUAL LEAF SCANNER -----------------
+# ----------------- TAB 2: VISUAL LEAF SCANNER & LIVE CAMERA -----------------
 with tab_scan:
-    st.subheader("📸 Offline Leaf Disease Visual Diagnostic Scanner")
+    st.subheader("📸 Real-Time & Offline Crop Disease Visual Scanner")
     st.write(
-        "Upload or capture a photograph of an affected crop leaf to analyze chlorosis, necrotic lesion density, and obtain immediate verified treatments."
+        "Capture a live photo or upload an image of an affected crop leaf to identify crop type, diagnose foliar diseases with real ML confidence scores, and obtain verified ICAR management protocols."
     )
 
-    uploaded_img = st.file_uploader(
-        "Upload Leaf Photo (JPG/PNG):",
-        type=["jpg", "jpeg", "png"],
-        key="scanner_tab_upload",
+    scan_mode = st.radio(
+        "Select Scan Source:",
+        ["📸 Live Camera Capture", "📁 Upload Image File"],
+        horizontal=True,
+        key="scanner_mode_select",
     )
-    col_crop, col_scan = st.columns([2, 1])
-    with col_crop:
+
+    col_crop_sel, col_scan_opt = st.columns([2, 2])
+    with col_crop_sel:
         crop_hint = st.selectbox(
-            "Select Crop Type (optional):",
-            ["Auto-detect", "Paddy (Rice)", "Tomato", "Cotton", "Wheat", "Chilli"],
+            "Crop Type (optional filter):",
+            ["Auto-detect", "Tomato", "Paddy (Rice)", "Cotton", "Wheat", "Chilli", "Potato"],
+            key="scanner_crop_hint",
+        )
+
+    uploaded_img = None
+    if scan_mode == "📸 Live Camera Capture":
+        uploaded_img = st.camera_input(
+            "Point camera steadily at the affected crop leaf:",
+            key="scanner_live_cam",
+        )
+    else:
+        uploaded_img = st.file_uploader(
+            "Upload Leaf Photo (JPG/PNG):",
+            type=["jpg", "jpeg", "png"],
+            key="scanner_tab_upload",
         )
 
     if uploaded_img is not None:
         c_left, c_right = st.columns([1, 1])
         img_bytes = uploaded_img.read()
         with c_left:
-            st.image(img_bytes, caption="Uploaded Leaf Image", use_container_width=True)
+            st.image(img_bytes, caption="Leaf Image Input", use_container_width=True)
 
         with c_right:
-            with st.spinner("Scanning leaf visual patterns & lesion density..."):
+            with st.spinner("Executing computer vision inference pipeline..."):
                 scan_res = leaf_vision_scanner.analyze_image_bytes(
                     img_bytes, crop_hint=crop_hint
                 )
 
-                if scan_res.get("status") == "success":
+                status = scan_res.get("status", "error")
+
+                if status == "success":
                     st.success(f"### 🔬 Diagnosis: **{scan_res['predicted_disease']}**")
-                    st.metric("Visual Confidence", f"{scan_res['confidence_pct']}%")
-                    st.metric(
-                        "Estimated Affected Leaf Area",
-                        f"{scan_res['affected_leaf_area_pct']}%",
-                    )
+                    st.write(f"🌱 **Identified Crop:** `{scan_res.get('crop', 'Crop')}`")
+
+                    m1, m2 = st.columns(2)
+                    with m1:
+                        st.metric("ML Model Confidence", f"{scan_res['confidence_pct']}%")
+                    with m2:
+                        st.metric(
+                            "Affected Foliar Area",
+                            f"{scan_res['affected_leaf_area_pct']}%",
+                        )
+
+                    # Quality diagnostics badge
+                    q = scan_res.get("quality_metrics", {})
+                    if q:
+                        st.caption(
+                            f"🔍 *Image Quality:* Sharpness: `{q.get('blur_score', 0)}` | "
+                            f"Foliage: `{q.get('foliage_ratio', 0)*100:.1f}%` | "
+                            f"Res: `{q.get('resolution', (0,0))[0]}x{q.get('resolution', (0,0))[1]}`"
+                        )
 
                     st.markdown("#### 📊 Foliar Surface Damage Breakdown")
                     metrics = scan_res.get("metrics", {})
@@ -429,7 +474,15 @@ with tab_scan:
                     )
 
                     st.markdown("#### 💊 Verified ICAR Management Protocol")
-                    st.info(scan_res.get("verified_protocol", ""))
+                    st.info(scan_res.get("verified_protocol", "Refer to local agronomist."))
+                elif status == "uncertain":
+                    st.warning(f"### ⚠️ Uncertain Prediction\n\n{scan_res.get('message')}")
+                    if scan_res.get("confidence_pct", 0) > 0:
+                        st.metric("Model Confidence (Below Threshold)", f"{scan_res['confidence_pct']}%")
+                    st.info("💡 **Tips for a Better Scan:**\n- Hold the camera steady to avoid motion blur\n- Ensure good daylight or even lighting\n- Move closer to fill the frame with the affected leaf")
+                elif status == "unusable":
+                    st.error(f"### ❌ Image Quality Issue\n\n{scan_res.get('message')}")
+                    st.info("💡 **Camera Guidelines:**\n- Capture higher resolution image\n- Avoid extreme shadow or direct camera glare\n- Center the crop leaf in the frame")
                 else:
                     st.error(scan_res.get("message", "Error scanning leaf."))
 
