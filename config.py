@@ -10,6 +10,14 @@ class Settings(BaseModel):
     CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
     TOP_K_RETRIEVAL: int = int(os.getenv("TOP_K_RETRIEVAL", "5"))
     OLLAMA_TIMEOUT: float = float(os.getenv("OLLAMA_TIMEOUT", "3.0"))
+    VISION_CONFIDENCE_THRESHOLD: float = float(
+        os.getenv("VISION_CONFIDENCE_THRESHOLD", "0.60")
+    )
+    VISION_IMAGE_SIZE: int = int(os.getenv("VISION_IMAGE_SIZE", "224"))
+    IMAGE_BLUR_THRESHOLD: float = float(os.getenv("IMAGE_BLUR_THRESHOLD", "30.0"))
+    IMAGE_MIN_LEAF_RATIO: float = float(os.getenv("IMAGE_MIN_LEAF_RATIO", "0.08"))
+    MODELS_DIR: str = os.getenv("MODELS_DIR", "./models")
+    VISION_DATASET_DIR: str = os.getenv("VISION_DATASET_DIR", "./data/vision_dataset")
 
 
 settings = Settings()
