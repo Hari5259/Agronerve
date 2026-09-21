@@ -88,5 +88,23 @@
     "favorable_conditions": "High temperature (28-30°C) with relative humidity above 80%, cloudy weather, and overhead rain splashes.",
     "management": "Spray Azoxystrobin 23% SC @ 1 ml/L or Tebuconazole 50% + Trifloxystrobin 25% WG @ 0.5 g/L or Copper Oxychloride @ 2.5 g/L at 10-14 day intervals.",
     "source": "TNAU Agritech Portal & ICAR-IIHR"
+  },
+  {
+    "id": "DIS_011",
+    "crop": "Potato",
+    "disease_name": "Potato Early Blight (Alternaria solani)",
+    "symptoms": "Brown to dark brown angular necrotic spots with characteristic target-board concentric rings on foliage. Infected leaves turn yellow, chlorotic, and dry up prematurely.",
+    "favorable_conditions": "Warm temperatures (24-30°C), alternating dry and humid periods, and heavy morning dew.",
+    "management": "Foliar spray of Mancozeb 75% WP @ 2.5 g/L or Chlorothalonil 75% WP @ 2.0 g/L or Azoxystrobin 23% SC @ 1 ml/L. Ensure balanced potassium fertilization and destroy crop debris.",
+    "source": "ICAR - Central Potato Research Institute (CPRI)"
+  },
+  {
+    "id": "DIS_012",
+    "crop": "Potato",
+    "disease_name": "Potato Late Blight (Phytophthora infestans)",
+    "symptoms": "Water-soaked irregular pale green patches on leaf margins and tips, turning rapidly dark brown to purplish black with white cottony/downy fungal growth on the underside under damp conditions. Causes severe tuber rot and rapid crop collapse.",
+    "favorable_conditions": "Cool temperatures (12-20°C), continuous high relative humidity (>90%), persistent overcast skies, and fog/drizzle.",
+    "management": "Prophylactic spray of Mancozeb 75% WP @ 2.5 g/L. Upon symptom appearance, apply systemic fungicides like Cymoxanil 8% + Mancozeb 64% WP @ 2.5 g/L or Metalaxyl 8% + Mancozeb 64% WP @ 2.5 g/L or Dimethomorph 50% WP @ 1.0 g/L.",
+    "source": "ICAR - Central Potato Research Institute (CPRI)"
   }
 ]
