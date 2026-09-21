@@ -161,12 +161,69 @@ def classify_intent_only(req: RouteRequest):
 
 @app.post("/api/scan-leaf", tags=["Computer Vision"])
 async def scan_leaf_image(file: UploadFile = File(...), crop_hint: str = "auto"):
-    """Accepts an uploaded leaf photograph and performs offline visual disease diagnosis."""
+    """Accepts an uploaded leaf photograph or live camera capture and performs ML visual crop disease diagnosis with uncertainty rejection."""
     image_bytes = await file.read()
     if not image_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
-    result = leaf_vision_scanner.analyze_image_bytes(image_bytes, crop_hint=crop_hint)
-    return result
+    raw_result = leaf_vision_scanner.analyze_image_bytes(image_bytes, crop_hint=crop_hint)
+
+    status = raw_result.get("status", "error")
+    if status == "success":
+        crop_info = (
+            raw_result.get("crop")
+            if isinstance(raw_result.get("crop"), dict)
+            else {
+                "name": raw_result.get("crop", "Unknown"),
+                "confidence": raw_result.get("crop_confidence", 0.95),
+            }
+        )
+        disease_info = {
+            "name": raw_result.get("predicted_disease", "Unknown"),
+            "confidence": raw_result.get("disease_confidence", 0.90),
+        }
+        return {
+            "status": "success",
+            "crop": crop_info,
+            "disease": disease_info,
+            "predicted_disease": raw_result.get("predicted_disease", "Crop Disease"),
+            "confidence_pct": raw_result.get("confidence_pct", 90.0),
+            "severity": "unknown",
+            "affected_leaf_area_pct": raw_result.get("affected_leaf_area_pct", 0.0),
+            "metrics": raw_result.get("metrics", {}),
+            "quality_metrics": raw_result.get("quality_metrics", {}),
+            "detected_symptoms": raw_result.get("detected_symptoms", []),
+            "verified_protocol": raw_result.get("verified_protocol", ""),
+            "knowledge": raw_result.get("knowledge", {}),
+            "ai_description": raw_result.get("ai_description", ""),
+            "engine": raw_result.get("engine", "vision_pipeline"),
+        }
+    elif status == "uncertain":
+        return {
+            "status": "uncertain",
+            "crop": raw_result.get("crop", {}),
+            "disease": raw_result.get("disease", {}),
+            "confidence_pct": raw_result.get("confidence_pct", 0.0),
+            "severity": "unknown",
+            "quality_metrics": raw_result.get("quality_metrics", {}),
+            "message": raw_result.get(
+                "message",
+                "Unable to confidently identify the crop/disease. Please capture a clearer image.",
+            ),
+            "ai_description": raw_result.get("ai_description", ""),
+        }
+    else:
+        return {
+            "status": status,
+            "crop": {},
+            "disease": {},
+            "confidence_pct": 0.0,
+            "severity": "unknown",
+            "quality_metrics": raw_result.get("quality_metrics", {}),
+            "message": raw_result.get(
+                "message", "Please capture a clearer image with better lighting."
+            ),
+            "ai_description": raw_result.get("ai_description", ""),
+        }
 
 
 @app.get("/api/sensor/telemetry", tags=["IoT Sensors"])
