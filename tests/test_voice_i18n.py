@@ -16,7 +16,8 @@ def test_voice_markdown_cleaning():
     clean = VoiceEngine.clean_text_for_speech(markdown)
     assert "#" not in clean
     assert "*" not in clean
-    assert "Mancozeb 75 WP" in clean
+    assert "Mancozeb 75" in clean
+    assert "wettable powder" in clean
 
 
 def test_voice_technical_unit_expansion():
@@ -33,8 +34,8 @@ def test_voice_technical_unit_expansion():
 
     # Test regulatory/safety abbreviation expansion
     clean_safety = VoiceEngine.clean_text_for_speech("Follow PPE and PHI rules")
-    assert "P P E" in clean_safety
-    assert "P H I" in clean_safety
+    assert "personal protective equipment" in clean_safety
+    assert "pre-harvest interval" in clean_safety
 
 
 def test_voice_html_script_generation():

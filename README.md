@@ -13,8 +13,10 @@
 - **Dynamic Agent Orchestration:** Automatically identifies intent (via a two-stage hybrid classifier) and dynamically assembles domain specialists on the fly.
 - **Multi-Domain Composite Reasoning:** Simultaneously queries multiple knowledge partitions when farmer questions span diseases, weather, and irrigation.
 - **📸 Visual Leaf Disease Scanner:** Upload or capture leaf photos to quantify chlorosis, necrotic lesion %, and receive verified ICAR treatment protocols.
+- **🛡️ CIBRC Safety Guardrails:** Automatic screening against banned agrochemicals, toxic dosages, missing PPE, and Pre-Harvest Interval (PHI) compliance.
+- **🧮 Precision Agri-Calculators:** Knapsack spray dilution, FAO-56 crop water budgeting (ETc), and NPK fertilizer (Urea/DAP/MOP) split calculations.
 - **📡 IoT Soil & Weather Telemetry:** Live Volumetric Water Content (VWC %) soil moisture tracking with automated drought alerts and fungal risk warnings.
-- **🔊 Voice Speech Synthesis (TTS):** Spoken audio readout for non-literate farmers.
+- **🔊 Voice Speech Synthesis (TTS):** Spoken audio readout for non-literate farmers with localized phonetic expansion.
 - **🌐 Regional Language Support:** Multilingual UI and prompts for English, Tamil (தமிழ்), Hindi (हिन्दी), Telugu (తెలుగు), and Kannada (ಕನ್ನಡ).
 - **Retrieval-Augmented Generation (RAG):** Contextually grounds model responses in curated agricultural databases (ICAR guidelines, FAO standards, CIBRC lists).
 
