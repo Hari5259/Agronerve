@@ -7,7 +7,7 @@
       "panicle_initiation_to_flowering": "Critical water stage: Maintain 5 cm continuous standing water. Water stress here causes high spikelet sterility.",
       "dough_to_ripening": "Maintain saturated soil (alternate wetting and drying). Drain completely 10-14 days before harvest."
     },
-    "soil_considerations": "Clay and clay-loam soils have high water retention. For sandy-loam soils, practice AWD (Alternate Wetting and Drying) to save 25-30% irrigation water.",
+    "soil_considerations": "Clay and clay-loam soils have high water retention. For sandy-loam soils, practice AWD (Alternate Wetting and Drying) using a 15 cm perforated field water tube to save 25-30% irrigation water without yield penalty.",
     "total_water_requirement_mm": "1100 - 1250 mm",
     "guidelines": "FAO-56 Irrigation and Drainage Paper No. 56 & ICAR-NRRI Water Management Protocol"
   },
@@ -50,5 +50,42 @@
     "soil_considerations": "Loam to clay loam soils. Typically requires 4 to 6 irrigations of 60 mm each throughout the season.",
     "total_water_requirement_mm": "350 - 450 mm",
     "guidelines": "ICAR-IIWBR Karnal Agronomic Recommendations"
+  },
+  {
+    "id": "IRR_005",
+    "crop": "Chilli",
+    "growth_stages": {
+      "nursery_and_transplanting": "Irrigate immediately after transplanting followed by life irrigation on the 3rd day.",
+      "vegetative_and_branching": "Irrigate at weekly intervals (every 7-9 days).",
+      "flowering_and_fruit_development": "MOST CRITICAL STAGE: Irrigate every 5-7 days. Prolonged moisture stress leads to flower shedding and fruit shriveling.",
+      "pod_ripening": "Restrict irrigation 10-15 days before final harvest to ensure uniform color development."
+    },
+    "soil_considerations": "Sensitive to water stagnation; requires well-drained sandy loam or alluvial soil. Drip fertigation increases yield by 35% with 40% water savings.",
+    "total_water_requirement_mm": "500 - 650 mm",
+    "guidelines": "TNAU Agritech Portal & IIHR Solanaceous Crop Protocols"
+  },
+  {
+    "id": "IRR_006",
+    "crop": "Maize (Corn)",
+    "growth_stages": {
+      "knee_high_stage": "20-30 days after emergence — vegetative canopy development.",
+      "tasseling_and_silking": "45-65 DAS — PEAK CRITICAL STAGE: Severe water deficit reduces pollination and grain filling.",
+      "dough_stage": "70-85 DAS — kernel moisture accumulation."
+    },
+    "soil_considerations": "Deep, well-aerated fertile loams. Avoid standing water for longer than 6 hours as maize roots are highly susceptible to hypoxia.",
+    "total_water_requirement_mm": "450 - 600 mm",
+    "guidelines": "ICAR-IIMR Ludhiana Maize Water Guide"
+  },
+  {
+    "id": "IRR_007",
+    "crop": "Banana",
+    "growth_stages": {
+      "vegetative_phase": "Irrigate every 3-4 days in summer and 7-8 days in winter (15-20 L/plant/day via drip).",
+      "shooting_and_bunch_emergence": "CRITICAL STAGE: Daily drip requirement rises to 25-30 L/plant/day.",
+      "finger_development_to_maturity": "Maintain steady moisture; avoid over-watering near harvest to prevent fruit peel splitting."
+    },
+    "soil_considerations": "Requires rich alluvial or clay loam with minimum 1 meter rooting depth. Drip irrigation with 4 drippers per plant is recommended.",
+    "total_water_requirement_mm": "1800 - 2200 mm",
+    "guidelines": "ICAR-NRCB Trichy Banana Water & Fertigation Guidelines"
   }
 ]
