@@ -45,6 +45,14 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "mosaic": 2.5,
         "damping-off": 3.0,
         "decay": 2.0,
+        "tikka": 3.5,
+        "sigatoka": 3.5,
+        "chlorosis": 2.5,
+        "pathogen": 3.0,
+        "uredinia": 3.0,
+        "necrosis": 2.5,
+        "bacterial": 2.5,
+        "viral": 2.5,
     },
     "pesticide": {
         "pesticide": 3.5,
@@ -88,6 +96,12 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "acaricide": 3.5,
         "repellent": 2.5,
         "dilute": 2.5,
+        "beauveria": 3.5,
+        "trichoderma": 3.5,
+        "spinosad": 3.5,
+        "azoxystrobin": 3.5,
+        "hexaconazole": 3.5,
+        "bactericide": 3.0,
     },
     "weather": {
         "weather": 3.5,
@@ -117,7 +131,9 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "sunny": 2.5,
         "precipitation": 3.5,
         "hail": 3.0,
+        "hailstorm": 3.5,
         "cyclone": 3.0,
+        "gale": 3.0,
     },
     "irrigation": {
         "irrigation": 3.5,
@@ -149,6 +165,8 @@ DOMAIN_WEIGHTS: Dict[str, Dict[str, float]] = {
         "hydrated": 2.5,
         "drought": 3.0,
         "sprinklers": 3.5,
+        "fertigation": 3.0,
+        "vertisol": 2.5,
     },
 }
 
