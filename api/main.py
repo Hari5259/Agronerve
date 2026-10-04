@@ -12,6 +12,8 @@ from core.vision_analyzer import leaf_vision_scanner
 from core.sensor_telemetry import sensor_manager
 from core.translator import language_manager, SUPPORTED_LANGUAGES
 from core.voice_engine import voice_engine
+from core.agri_calculator import agri_calculator
+from core.safety_guardrails import safety_guardrails
 from evaluation.benchmark import AgroNerveBenchmark
 from config import settings
 
@@ -74,6 +76,32 @@ class RouteRequest(BaseModel):
 class SpeechCleanRequest(BaseModel):
     text: str
     language: Optional[str] = "en"
+
+
+class SprayDosageRequest(BaseModel):
+    area_acres: float = Field(..., gt=0.0, json_schema_extra={"example": 2.5})
+    dose_per_liter: float = Field(..., gt=0.0, json_schema_extra={"example": 0.4})
+    unit: Optional[str] = Field("ml", json_schema_extra={"example": "ml"})
+    tank_capacity_liters: Optional[float] = Field(16.0, json_schema_extra={"example": 16.0})
+    water_volume_per_acre: Optional[float] = Field(200.0, json_schema_extra={"example": 200.0})
+
+
+class WaterRequirementRequest(BaseModel):
+    crop: str = Field(..., json_schema_extra={"example": "tomato"})
+    stage: Optional[str] = Field("mid", json_schema_extra={"example": "mid"})
+    area_acres: Optional[float] = Field(1.0, gt=0.0, json_schema_extra={"example": 1.0})
+    eto_mm_day: Optional[float] = Field(4.5, gt=0.0, json_schema_extra={"example": 4.5})
+    irrigation_efficiency: Optional[float] = Field(0.85, gt=0.0, le=1.0, json_schema_extra={"example": 0.85})
+
+
+class FertilizerNPKRequest(BaseModel):
+    n_kg: float = Field(..., ge=0.0, json_schema_extra={"example": 50.0})
+    p_kg: float = Field(..., ge=0.0, json_schema_extra={"example": 25.0})
+    k_kg: float = Field(..., ge=0.0, json_schema_extra={"example": 25.0})
+
+
+class SafetyAuditRequest(BaseModel):
+    advisory_text: str = Field(..., json_schema_extra={"example": "Spray Chlorantraniliprole 18.5 SC at 0.4 ml/L for stem borer."})
 
 
 class SensorTelemetryUpdate(BaseModel):
@@ -299,3 +327,44 @@ def browse_knowledge_base(
 def run_evaluation_benchmark():
     """Executes the test query benchmark and returns accuracy and confusion matrix."""
     return benchmark_runner.run_benchmark()
+
+
+@app.post("/api/calculate/spray-dosage", tags=["Agro-Calculators"])
+def calculate_spray_dosage(req: SprayDosageRequest):
+    """Calculates chemical dilution, required knapsack refills, and total spray volume."""
+    return agri_calculator.calculate_spray_dosage(
+        area_acres=req.area_acres,
+        dose_per_liter=req.dose_per_liter,
+        unit=req.unit or "ml",
+        tank_capacity_liters=req.tank_capacity_liters or 16.0,
+        water_volume_per_acre=req.water_volume_per_acre or 200.0,
+    )
+
+
+@app.post("/api/calculate/water-requirement", tags=["Agro-Calculators"])
+def calculate_water_requirement(req: WaterRequirementRequest):
+    """Calculates crop evapotranspiration (ETc) and daily/weekly water requirements under FAO-56."""
+    return agri_calculator.calculate_water_requirement(
+        crop=req.crop,
+        stage=req.stage or "mid",
+        area_acres=req.area_acres or 1.0,
+        eto_mm_day=req.eto_mm_day or 4.5,
+        irrigation_efficiency=req.irrigation_efficiency or 0.85,
+    )
+
+
+@app.post("/api/calculate/fertilizer-npk", tags=["Agro-Calculators"])
+def calculate_fertilizer_npk(req: FertilizerNPKRequest):
+    """Calculates required commercial fertilizer products (Urea, DAP, MOP) for targeted NPK."""
+    return agri_calculator.calculate_fertilizer_npk_sources(
+        n_kg=req.n_kg,
+        p_kg=req.p_kg,
+        k_kg=req.k_kg,
+    )
+
+
+@app.post("/api/safety/validate-advisory", tags=["Safety Guardrails"])
+def validate_advisory_safety(req: SafetyAuditRequest):
+    """Performs safety audit against banned agrochemicals, PPE mandates, and toxic concentrations."""
+    return safety_guardrails.audit_advisory(req.advisory_text)
+
