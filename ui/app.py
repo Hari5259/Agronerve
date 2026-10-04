@@ -17,6 +17,7 @@ from core.sensor_telemetry import sensor_manager
 from core.translator import language_manager, SUPPORTED_LANGUAGES
 from core.voice_engine import voice_engine
 from core.session_manager import session_manager
+from core.agri_calculator import agri_calculator
 from evaluation.benchmark import AgroNerveBenchmark
 
 st.set_page_config(
@@ -550,46 +551,66 @@ with tab_kb:
 
 # ----------------- TAB 5: AGRO-CALCULATORS -----------------
 with tab_calc:
-    st.subheader(language_manager.get_text("calc_tab", current_lang))
-    c1, c2 = st.columns(2)
+    st.subheader(f"🧮 {language_manager.get_text('calc_tab', current_lang)}")
+    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["🧪 Spray Dosage & Tanks", "💧 Water Requirement (ETc)", "🌱 Fertilizer NPK Split"])
 
-    with c1:
+    with calc_tab1:
         st.markdown(f"#### 🧪 {language_manager.get_text('dosage_calc', current_lang)}")
-        tank_size = st.number_input(
-            language_manager.get_text("tank_size", current_lang),
-            min_value=1.0,
-            value=16.0,
-            step=1.0,
-        )
-        dosage_rate = st.number_input(
-            language_manager.get_text("dosage_rate", current_lang),
-            min_value=0.1,
-            value=0.5,
-            step=0.1,
-        )
-        total_chemical = tank_size * dosage_rate
-        st.success(
-            f"**{language_manager.get_text('calc_result', current_lang)}:** `{total_chemical:.2f} ml (or grams)` per tank."
-        )
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            acres_in = st.number_input("Field Area (Acres):", min_value=0.1, value=1.0, step=0.5, key="spray_acres")
+            dose_in = st.number_input("Dosage Rate (ml or g per Liter):", min_value=0.05, value=0.4, step=0.05, key="spray_dose")
+        with col_c2:
+            tank_in = st.number_input("Knapsack Tank Size (Liters):", min_value=1.0, value=16.0, step=1.0, key="spray_tank")
+            water_vol_in = st.number_input("Water Volume per Acre (Liters):", min_value=50.0, value=200.0, step=25.0, key="spray_vol")
 
-    with c2:
+        spray_res = agri_calculator.calculate_spray_dosage(
+            area_acres=acres_in,
+            dose_per_liter=dose_in,
+            tank_capacity_liters=tank_in,
+            water_volume_per_acre=water_vol_in,
+        )
+        st.success(f"**Spray Recommendation:** {spray_res['advisory']}")
+        st.info(f"📊 **Total Knapsack Refills:** `{spray_res['total_knapsack_tanks']}` tanks | **Chemical Per Tank:** `{spray_res['chemical_per_tank']} ml/g`")
+
+    with calc_tab2:
         st.markdown(f"#### 💧 {language_manager.get_text('water_calc', current_lang)}")
-        crop_selected = st.selectbox(
-            "Crop Type:", ["Paddy (Rice)", "Tomato", "Cotton", "Wheat"]
+        cw1, cw2 = st.columns(2)
+        with cw1:
+            crop_sel = st.selectbox("Crop Type:", ["Paddy", "Tomato", "Cotton", "Wheat", "Chilli", "Maize", "Banana"], key="water_crop")
+            stage_sel = st.selectbox("Phenological Stage:", ["initial", "mid", "late"], index=1, key="water_stage")
+        with cw2:
+            acres_water = st.number_input("Field Area (Acres):", min_value=0.1, value=1.0, step=0.5, key="water_acres")
+            eto_in = st.slider("Reference ETo (mm/day):", min_value=2.0, max_value=8.0, value=4.5, step=0.5, key="water_eto")
+
+        water_res = agri_calculator.calculate_water_requirement(
+            crop=crop_sel,
+            stage=stage_sel,
+            area_acres=acres_water,
+            eto_mm_day=eto_in,
         )
-        soil_selected = st.selectbox(
-            "Soil Texture:", ["Clay / Black Cotton", "Loam", "Sandy Loam"]
-        )
-        area_acres = st.number_input(
-            "Field Area (Acres):", min_value=0.1, value=1.0, step=0.5
+        st.success(f"**Water Budget:** {water_res['advisory']}")
+        st.metric("Daily Gross Water Requirement", f"{water_res['daily_gross_liters']:,.0f} Liters", delta=f"{water_res['etc_mm_day']} mm/day ETc")
+
+    with calc_tab3:
+        st.markdown("#### 🌱 Fertilizer NPK Product Calculator")
+        st.caption("Calculate exact commercial product weights (Urea, DAP, MOP) to fulfill nutrient recommendations.")
+        fn1, fn2, fn3 = st.columns(3)
+        with fn1:
+            n_target = st.number_input("Target N (kg/acre):", min_value=0.0, value=40.0, step=5.0)
+        with fn2:
+            p_target = st.number_input("Target P₂O₅ (kg/acre):", min_value=0.0, value=20.0, step=5.0)
+        with fn3:
+            k_target = st.number_input("Target K₂O (kg/acre):", min_value=0.0, value=20.0, step=5.0)
+
+        npk_res = agri_calculator.calculate_fertilizer_npk_sources(n_target, p_target, k_target)
+        st.success(
+            f"**Commercial Fertilizer Required:**\n"
+            f"- 🌾 **DAP (18-46-0):** `{npk_res['dap_kg']} kg`\n"
+            f"- ⚡ **Urea (46-0-0):** `{npk_res['urea_kg']} kg`\n"
+            f"- 🔴 **MOP / Potash (0-0-60):** `{npk_res['mop_kg']} kg`"
         )
 
-        base_req = {"Paddy (Rice)": 1200, "Tomato": 500, "Cotton": 700, "Wheat": 400}
-        mm_req = base_req.get(crop_selected, 500)
-        total_m3 = (mm_req / 1000.0) * (area_acres * 4046.86)
-        st.info(
-            f"**Total Seasonal Requirement:** ~`{mm_req} mm` (~`{total_m3:,.0f} m³` for {area_acres} acre(s))"
-        )
 
 # ----------------- TAB 6: BENCHMARKS -----------------
 with tab_bench:
