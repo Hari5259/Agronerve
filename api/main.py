@@ -368,3 +368,19 @@ def validate_advisory_safety(req: SafetyAuditRequest):
     """Performs safety audit against banned agrochemicals, PPE mandates, and toxic concentrations."""
     return safety_guardrails.audit_advisory(req.advisory_text)
 
+
+@app.get("/api/sensor/advisory-alerts", tags=["IoT Sensors"])
+def get_sensor_advisory_alerts():
+    """Returns prioritized real-time agronomic alerts triggered by live sensor readings."""
+    return {
+        "alerts": sensor_manager.get_proactive_field_alerts(),
+        "recommended_irrigation_duration_min": sensor_manager.calculate_irrigation_duration_minutes(),
+    }
+
+
+@app.get("/api/chat/summary/{session_id}", tags=["Multimodal Chat"])
+def get_consultation_summary(session_id: str):
+    """Generates an executive agronomic summary of an active farmer consultation session."""
+    return session_manager.get_session_summary(session_id)
+
+
