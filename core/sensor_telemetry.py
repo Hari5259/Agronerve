@@ -1,6 +1,8 @@
+"""AgroNerve Sensor Telemetry & IoT Agronomic Monitoring Manager."""
+
 import random
 import time
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class SensorTelemetryManager:
@@ -86,6 +88,58 @@ class SensorTelemetryManager:
                 "chemical_spray_window": spray_window_status,
             },
         }
+
+    def get_proactive_field_alerts(self) -> List[Dict[str, Any]]:
+        """Generates prioritized proactive alarm notifications for the farmer."""
+        alerts = []
+        # 1. Critical Drought / Moisture Stress
+        if self._soil_moisture_vwc < 20.0:
+            alerts.append({
+                "severity": "CRITICAL",
+                "category": "IRRIGATION",
+                "title": "Severe Soil Moisture Deficit",
+                "message": f"Soil volumetric water is {self._soil_moisture_vwc}%. Immediate root-zone irrigation needed.",
+                "action": "Start Drip / Sprinkler cycle for 45-60 minutes."
+            })
+        elif self._soil_moisture_vwc > 80.0:
+            alerts.append({
+                "severity": "WARNING",
+                "category": "DRAINAGE",
+                "title": "Excess Soil Moisture / Waterlogging",
+                "message": f"Soil water content is {self._soil_moisture_vwc}%. High risk of root hypoxia.",
+                "action": "Open field drainage channels and suspend all watering."
+            })
+
+        # 2. Pathogen Humidity Trigger
+        if self._ambient_humidity_rh >= 85.0 and 18.0 <= self._ambient_temp_c <= 28.0:
+            alerts.append({
+                "severity": "HIGH",
+                "category": "DISEASE_RISK",
+                "title": "Fungal Epidemic Outbreak Window",
+                "message": f"Continuous high humidity ({self._ambient_humidity_rh}%) and warm temperatures favor blast and blight spore germination.",
+                "action": "Plan preventative systemic fungicide spray once leaf surfaces dry."
+            })
+
+        # 3. Heatwave Scorch Alert
+        if self._ambient_temp_c >= 38.0:
+            alerts.append({
+                "severity": "WARNING",
+                "category": "HEAT_STRESS",
+                "title": "Extreme Heat Stress",
+                "message": f"Ambient temperature is {self._ambient_temp_c}°C. Chemical spraying will cause severe leaf scorch.",
+                "action": "Postpone chemical spraying until after 5:30 PM."
+            })
+
+        return alerts
+
+    def calculate_irrigation_duration_minutes(
+        self, target_moisture: float = 60.0
+    ) -> float:
+        """Calculates recommended drip run duration in minutes to bring current soil moisture to target."""
+        if self._soil_moisture_vwc >= target_moisture:
+            return 0.0
+        deficit_pct = target_moisture - self._soil_moisture_vwc
+        return round(deficit_pct * 1.8, 1)
 
     def set_manual_telemetry(
         self, soil_moisture: float, ambient_temp: float, humidity: float, rain: bool
