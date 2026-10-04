@@ -100,14 +100,15 @@ class RAGPipeline:
     def _offline_retrieve(
         self, query: str, domain: str, top_k: int
     ) -> List[Dict[str, Any]]:
-        """BM25/TF-IDF inspired term matching across domain-partitioned chunks."""
+        """BM25/TF-IDF inspired term matching with exact phrase and metadata re-ranking."""
         target_chunks = [
             c for c in self.chunks if domain == "general" or c["domain"] == domain
         ]
         if not target_chunks:
             target_chunks = self.chunks
 
-        query_tokens = set(re.findall(r"\w+", query.lower()))
+        query_clean = query.lower().strip()
+        query_tokens = set(re.findall(r"\w+", query_clean))
         if not query_tokens:
             return target_chunks[:top_k]
 
@@ -118,23 +119,31 @@ class RAGPipeline:
             doc_len = len(chunk_tokens) or 1
 
             score = 0.0
-            # Term frequency & title matches
+            # 1. Term frequency & title matches
             for token in query_tokens:
                 if len(token) < 2:
                     continue
                 tf = chunk_text_lower.count(token)
                 if tf > 0:
                     score += (tf / doc_len) * (
-                        2.5 if token in chunk.get("title", "").lower() else 1.0
+                        3.0 if token in chunk.get("title", "").lower() else 1.2
                     )
                     score += 1.0  # Base occurrence boost
 
-            # Specific crop match boost
+            # 2. Exact multi-word query sub-sequence boost
+            if len(query_clean) > 4 and query_clean in chunk_text_lower:
+                score += 10.0
+
+            # 3. Specific crop match boost
             if "crop" in chunk and chunk["crop"]:
                 crop_lower = chunk["crop"].lower()
                 for q_tok in query_tokens:
                     if q_tok in crop_lower:
-                        score += 5.0
+                        score += 6.0
+
+            # 4. Domain consistency bonus
+            if chunk.get("domain") == domain:
+                score += 2.0
 
             scored_chunks.append((score, chunk))
 
@@ -151,7 +160,11 @@ class RAGPipeline:
             return "No specific offline knowledge chunks retrieved."
         formatted = []
         for i, chunk in enumerate(chunks):
+            title = chunk.get("title") or chunk.get("crop") or f"Knowledge Document #{i+1}"
+            domain_label = chunk.get("domain", "general").capitalize()
+            text = chunk.get("text", "").strip()
             formatted.append(
-                f"[Grounding Knowledge Chunk #{i+1}]\n{chunk.get('text', '').strip()}"
+                f"[Grounding Knowledge Chunk #{i+1} | {domain_label}: {title}]\n{text}"
             )
         return "\n\n".join(formatted)
+
