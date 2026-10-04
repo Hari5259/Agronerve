@@ -30,5 +30,21 @@
     "spray_advisory": "PROHIBIT all pesticide spraying during gusty winds. Wind drift causes serious chemical loss, uneven coverage, and toxic drift hazards to neighboring fields and dwellings.",
     "field_operations": "Provide physical staking and earthing-up support for tall crops (Sugarcane, Banana, Maize, Tomato trellis). Check greenhouse / polyhouse plastic sheet anchoring.",
     "disease_alert": "Wind-borne spread of fungal urediniospores and bacterial droplets."
+  },
+  {
+    "id": "WEATH_005",
+    "weather_condition": "Cold Wave and Ground Frost Danger (Temperature < 4°C)",
+    "cached_forecast_window": "Peak Winter Nights (December - January in Northern & Central India)",
+    "spray_advisory": "Apply 0.1% Thiourea (1 g/L) or Soluble Sulphur (2 g/L) foliar spray 2 days before predicted frost to induce cold tolerance in mustard, potato, and vegetables.",
+    "field_operations": "Provide evening light surface irrigation to increase soil heat capacity and raise micro-climate temperature by 1-2°C. Create smoke cover around field boundaries during late night hours.",
+    "disease_alert": "Cold-damaged tissues become entry points for Botrytis gray mold and bacterial rot."
+  },
+  {
+    "id": "WEATH_006",
+    "weather_condition": "Post-Hailstorm Recovery & Crop Rehabilitation",
+    "cached_forecast_window": "Immediate Post-Storm (Within 24-48 hours)",
+    "spray_advisory": "Immediately spray Copper Oxychloride 50 WP @ 2.5 g/L + Streptocycline @ 0.1 g/L to prevent secondary bacterial and fungal infections entering hail lacerations.",
+    "field_operations": "Remove broken stems and severely shredded leaves. Apply foliar spray of 19:19:19 NPK @ 5 g/L or 1% Urea to stimulate fast secondary vegetative flushing.",
+    "disease_alert": "High risk of wound pathogens (Bacterial soft rot, Anthracnose, Fusarium)."
   }
 ]
