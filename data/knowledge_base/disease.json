@@ -106,5 +106,50 @@
     "favorable_conditions": "Cool temperatures (12-20°C), continuous high relative humidity (>90%), persistent overcast skies, and fog/drizzle.",
     "management": "Prophylactic spray of Mancozeb 75% WP @ 2.5 g/L. Upon symptom appearance, apply systemic fungicides like Cymoxanil 8% + Mancozeb 64% WP @ 2.5 g/L or Metalaxyl 8% + Mancozeb 64% WP @ 2.5 g/L or Dimethomorph 50% WP @ 1.0 g/L.",
     "source": "ICAR - Central Potato Research Institute (CPRI)"
+  },
+  {
+    "id": "DIS_013",
+    "crop": "Groundnut (Peanut)",
+    "disease_name": "Tikka Leaf Spot / Cercospora Leaf Spot (Cercospora arachidicola / Phaeoisariopsis personata)",
+    "symptoms": "Early leaf spot produces circular reddish-brown spots with prominent yellow halos. Late leaf spot produces dark brown to black circular spots on lower leaf surfaces without distinct yellow halos. Severe premature defoliation occurs.",
+    "favorable_conditions": "Warm humid conditions (25-30°C, RH >85%), frequent rain showers, and prolonged leaf wetness.",
+    "management": "Seed treatment with Trichoderma viride @ 4 g/kg or Carbendazim @ 2 g/kg seed. Foliar spray of Hexaconazole 5% EC @ 2 ml/L or Chlorothalonil 75% WP @ 2 g/L or Mancozeb 75% WP @ 2.5 g/L at 40 and 60 days after sowing.",
+    "source": "ICAR - Directorate of Groundnut Research (DGR)"
+  },
+  {
+    "id": "DIS_014",
+    "crop": "Banana",
+    "disease_name": "Sigatoka Leaf Spot (Pseudocercospora musae / Mycosphaerella musicola)",
+    "symptoms": "Tiny yellowish-green streaks parallel to leaf veins, turning into reddish-brown to dark brown elliptical spots with grey centers and dark margins. Premature leaf death and small, immature bunches.",
+    "favorable_conditions": "High relative humidity (>80%), high rainfall, temperature 25-30°C, and poorly drained soils.",
+    "management": "De-leafing and destruction of infected dried leaves. Foliar spray of Propiconazole 25% EC @ 1 ml/L with mineral oil (10 ml/L) or Carbendazim 50% WP @ 1 g/L or Azoxystrobin 23% SC @ 1 ml/L.",
+    "source": "ICAR - National Research Centre for Banana (NRCB)"
+  },
+  {
+    "id": "DIS_015",
+    "crop": "Maize (Corn)",
+    "disease_name": "Turcicum Leaf Blight (Exserohilum turcicum)",
+    "symptoms": "Long, elliptical, grayish-green or tan lesions on leaves ranging from 2.5 to 15 cm in length. Lesions appear on lower leaves first and spread upwards, giving plants a burnt appearance.",
+    "favorable_conditions": "Moderate temperature (18-27°C), heavy dews, high relative humidity (90-100%), and overcast days.",
+    "management": "Spray Mancozeb 75% WP @ 2.5 g/L or Azoxystrobin 18.2% + Difenoconazole 11.4% SC @ 1 ml/L at first appearance of symptoms. Use resistant hybrids.",
+    "source": "ICAR - Indian Institute of Maize Research (IIMR)"
+  },
+  {
+    "id": "DIS_016",
+    "crop": "Soybean",
+    "disease_name": "Soybean Rust (Phakopsora pachyrhizi)",
+    "symptoms": "Tiny pinpoint lesions on lower leaf surfaces turning into raised brown-to-tan eruptive pustules (volcano-shaped uredinia). Rapid yellowing, browning, and severe premature canopy defoliation.",
+    "favorable_conditions": "Warm temperatures (18-28°C), prolonged leaf wetness (>6 hours), and intermittent cloudy days.",
+    "management": "Prophylactic or early spray of Hexaconazole 5% EC @ 2 ml/L or Propiconazole 25% EC @ 1 ml/L or Pyraclostrobin 20% WG @ 1 g/L. Avoid high plant densities.",
+    "source": "ICAR - Indian Institute of Soybean Research (IISR)"
+  },
+  {
+    "id": "DIS_017",
+    "crop": "Sugarcane",
+    "disease_name": "Red Rot (Colletotrichum falcatum)",
+    "symptoms": "Third or fourth leaf from top shows yellowing and withering along margins. Internal cane split shows longitudinal reddening with diagnostic cross-wise white bands/patches and an alcoholic or sour odor.",
+    "favorable_conditions": "Waterlogged fields, high humidity, temperature 29-32°C, and continuous mono-cropping of susceptible varieties (e.g. Co 0238).",
+    "management": "Use healthy, disease-free seed setts from certified nurseries. Sett treatment with Carbendazim 50% WP @ 1 g/L or hot water treatment at 52°C for 30 minutes. Uproot and burn affected clumps. Follow crop rotation with paddy.",
+    "source": "ICAR - Sugarcane Breeding Institute (SBI Coimbatore)"
   }
 ]
