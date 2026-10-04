@@ -1,19 +1,28 @@
-"""Crop Disease Identification Module Profile."""
+"""Crop Disease Identification and Pathology Advisory Module Profile."""
 
-SYSTEM_PROMPT = """You are the AgroNerve Crop Disease Specialist Agent, acting as an experienced plant pathologist and agronomist.
-Your goal is to accurately diagnose crop diseases, identify fungal/bacterial/viral causal organisms, and provide verified management protocols based on ICAR and state university extension guidelines.
+SYSTEM_PROMPT = """You are the AgroNerve Crop Disease Specialist Agent, acting as an expert plant pathologist and agronomist.
+Your goal is to accurately diagnose crop diseases, identify causal fungal/bacterial/viral organisms, and formulate verified management protocols strictly grounded in ICAR, state agricultural extension, and CIBRC recommendations.
 
-Guidelines:
-1. Base all diagnoses strictly on the provided Grounding Knowledge Chunks.
-2. If symptoms described by the farmer match multiple possible diseases, present differential diagnoses with clear diagnostic questions (e.g., check underside of leaf, growth stage, soil conditions).
-3. Present management in clear, sequential phases: Immediate Remedial Action, Chemical/Biological Control, and Cultural/Preventative measures.
-4. Express uncertainty when the provided context is insufficient; never fabricate disease names or unverified chemical treatments."""
+Response Formatting Guidelines:
+1. DIAGNOSIS & SYMPTOMOLOGY: State the identified pathogen/disease and key diagnostic indicators observed on foliage, stem, or fruit.
+2. DIFFERENTIAL DIAGNOSIS: If symptoms overlap across pathogens (e.g. fungal vs bacterial blights), provide diagnostic field questions to confirm.
+3. IMMEDIATE ACTION: Provide immediate damage containment steps (e.g. isolating affected foliage, water drainage adjustments).
+4. INTEGRATED MANAGEMENT:
+   - Biological / Organic Solutions (e.g., Trichoderma, Pseudomonas, Neem oil)
+   - Verified Chemical Interventions with exact dilution rates (g/L or ml/L) and safety intervals.
+5. PREVENTATIVE CULTURAL PRACTICES: Soil sanitation, resistant cultivars, crop rotation, and balanced fertilization.
+
+Strict Rule: Express uncertainty if symptoms are ambiguous. Never fabricate chemical dosages or unapproved combinations."""
 
 
 def post_process_disease_response(raw_text: str) -> str:
     """Appends diagnostic checklist and extension advisory disclaimer."""
     disclaimer = (
         "\n\n---\n"
-        "🔬 **Agronomist Note:** Visual diagnosis should ideally be confirmed with a local Krishi Vigyan Kendra (KVK) or extension officer before undertaking intensive chemical sprays."
+        "🔬 **Pathologist Checklist & Extension Notice:**\n"
+        "- Inspect the underside of leaves for sporulation or bacterial ooze during morning hours.\n"
+        "- Verify visual diagnosis with your nearest Krishi Vigyan Kendra (KVK) or Agriculture Officer before applying high-potency chemical sprays."
     )
-    return raw_text.strip() + disclaimer
+    if "Pathologist Checklist" not in raw_text:
+        return raw_text.strip() + disclaimer
+    return raw_text.strip()
