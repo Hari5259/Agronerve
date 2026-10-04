@@ -68,5 +68,45 @@
     "pre_harvest_interval_days": 10,
     "safety_precautions": "Do not mix with strongly alkaline solutions or organophosphates. Wear protective eye gear. Wash spray equipment thoroughly after use.",
     "cibrc_status": "Registered fungicide & bactericide."
+  },
+  {
+    "id": "PEST_008",
+    "trade_or_common_name": "Beauveria bassiana 1.15% WP (Bio-Insecticide)",
+    "category": "Entomopathogenic Fungal Biological Agent",
+    "target_pests": "Whiteflies, Aphids, Thrips, Mealybugs, and early stage lepidopteran caterpillars in Organic and Integrated Pest Management (IPM).",
+    "recommended_dosage": "5.0 g per Liter of water (1 kg/acre in 200 L water) with 1 ml/L surfactant.",
+    "pre_harvest_interval_days": 0,
+    "safety_precautions": "100% bio-safe, non-toxic to mammals and honeybees. Store in cool shade below 30°C. Apply during high relative humidity or evening hours for optimum spore germination.",
+    "cibrc_status": "Registered bio-pesticide under CIBRC Section 9(3b)."
+  },
+  {
+    "id": "PEST_009",
+    "trade_or_common_name": "Trichoderma viride 1% WP (Bio-Fungicide)",
+    "category": "Antagonistic Fungal Biological Control Agent",
+    "target_pests": "Soil-borne pathogens: Fusarium wilt, Rhizoctonia root rot, Pythium damping-off, Sclerotium collar rot across pulses, vegetables, and cotton.",
+    "recommended_dosage": "Seed treatment: 5-10 g/kg seed; Soil application: 2 kg mixed with 100 kg enriched Farmyard Manure (FYM) per acre.",
+    "pre_harvest_interval_days": 0,
+    "safety_precautions": "Do not mix with chemical fungicides or bactericides. Ensure adequate soil moisture at application time.",
+    "cibrc_status": "Certified Bio-Fungicide for sustainable agriculture."
+  },
+  {
+    "id": "PEST_010",
+    "trade_or_common_name": "Azoxystrobin 23% SC (Amistar / Mirador)",
+    "category": "Broad-spectrum Systemic Strobilurin Fungicide",
+    "target_pests": "Powdery Mildew, Downy Mildew, Anthracnose, Late Blight, Blast in Grapes, Tomato, Chilli, Mango, and Rice.",
+    "recommended_dosage": "1.0 ml per Liter of water (200 ml/acre in 200 L water).",
+    "pre_harvest_interval_days": 7,
+    "safety_precautions": "Rotate with non-strobilurin fungicides to prevent resistance development. Avoid runoff into fish ponds (toxic to aquatic fauna).",
+    "cibrc_status": "Standard registered preventative and curative fungicide."
+  },
+  {
+    "id": "PEST_011",
+    "trade_or_common_name": "Spinosad 45% SC (Tracer / Spintor)",
+    "category": "Naturally Derived Saccharopolyspora spinosa Insecticide",
+    "target_pests": "Thrips, Diamondback Moth, Bollworms, Fruit and Shoot Borers in Chilli, Tomato, Brinjal, and Cotton.",
+    "recommended_dosage": "0.3 to 0.35 ml per Liter of water (60-70 ml/acre in 200 L water).",
+    "pre_harvest_interval_days": 3,
+    "safety_precautions": "Low mammalian toxicity and rapid environment degradation. Toxic to bees while wet; avoid spraying directly onto active hives.",
+    "cibrc_status": "Approved for vegetables and high-value export crops."
   }
 ]
