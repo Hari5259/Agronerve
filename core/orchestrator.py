@@ -9,6 +9,8 @@ from core.rag_pipeline import RAGPipeline
 from core.session_manager import session_manager
 from core.vision_analyzer import leaf_vision_scanner
 from core.translator import language_manager
+from core.safety_guardrails import safety_guardrails
+from core.response_formatter import response_formatter
 
 from domains.disease import (
     SYSTEM_PROMPT as DISEASE_PROMPT,
@@ -221,6 +223,11 @@ class AgentOrchestrator:
             )
 
         final_response = post_process_disease_response(raw_response)
+        final_response = safety_guardrails.sanitize_and_guard(final_response)
+        final_response = response_formatter.format_structured_advisory(
+            final_response, domain="disease", crop=detected_crop, language=language
+        )
+        safety_audit = safety_guardrails.audit_advisory(final_response)
 
         # 5. Record turn in session memory
         session.add_message(
@@ -231,7 +238,7 @@ class AgentOrchestrator:
         session.add_message(
             "assistant",
             final_response,
-            {"domain": "disease", "vision_result": vision_result},
+            {"domain": "disease", "vision_result": vision_result, "safety_audit": safety_audit},
         )
 
         elapsed_seconds = round(time.time() - start_time, 2)
@@ -248,6 +255,7 @@ class AgentOrchestrator:
             "agent_name": "Crop Disease Specialist (Visual AI)",
             "response": final_response,
             "vision_result": vision_result,
+            "safety_audit": safety_audit,
             "chunks_retrieved": len(retrieved_chunks),
             "engine": llm_engine_used,
             "latency_seconds": elapsed_seconds,
@@ -351,12 +359,18 @@ class AgentOrchestrator:
             if post_fn:
                 final_response = post_fn(final_response)
 
+        final_response = safety_guardrails.sanitize_and_guard(final_response)
+        final_response = response_formatter.format_structured_advisory(
+            final_response, domain=primary_domain, crop=session.current_crop, language=language
+        )
+        safety_audit = safety_guardrails.audit_advisory(final_response)
+
         # 6. Record turn in session memory
         session.add_message("user", query)
         session.add_message(
             "assistant",
             final_response,
-            {"domain": primary_domain, "active_domains": active_domains},
+            {"domain": primary_domain, "active_domains": active_domains, "safety_audit": safety_audit},
         )
 
         elapsed_seconds = round(time.time() - start_time, 2)
@@ -372,6 +386,7 @@ class AgentOrchestrator:
             "is_multi_domain": is_multi_domain,
             "agent_name": agent_name,
             "response": final_response,
+            "safety_audit": safety_audit,
             "chunks_retrieved": len(all_chunks),
             "route_meta": multi_meta,
             "engine": llm_engine_used,
